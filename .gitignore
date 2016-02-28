@@ -1,0 +1,9 @@
+config/
+.idea/
+sendgridelixir.iml
+/_build
+/cover
+/deps
+erl_crash.dump
+*.ez
+/doc
