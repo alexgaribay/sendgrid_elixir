@@ -2,8 +2,7 @@ defmodule SendGrid.Email do
   @moduledoc """
   Email primitive for composing emails with SendGrid's API.
 
-      email =
-        Email.build()
+      Email.build()
         |> Email.put_to("test@email.com")
         |> Email.put_from("test2@email.com")
         |> Email.put_subject("Hello from Elixir")
@@ -96,7 +95,7 @@ defmodule SendGrid.Email do
   @doc """
   Deletes a single CC address from the email.
 
-      Email.delete_cc(%Email{cc:["test@email.com"], "test@email.com"))
+      Email.delete_cc(%Email{cc:["test@email.com"]}, "test@email.com"))
       %Email{cc:[]}
 
   """
