@@ -45,6 +45,8 @@ defmodule SendGrid.Mailer do
       |> format_email_data
       |> convert_to_form_data
 
+    IO.inspect(payload)
+
     case HTTPoison.post(@api_url <> "mail.send.json", payload, headers) do
       { :ok, %{ status_code: 200 } } -> :ok
       { :ok, %{ body: body } } -> { :error, Poison.decode!(body)["errors"] }
@@ -54,15 +56,20 @@ defmodule SendGrid.Mailer do
 
   defp format_email_data(%Email{} = email) do
     from_name = email.from_name
-    template = email.x_smtpapi
     reply_to = email.reply_to
+    x_smtpapi = email
+                  |> full_x_smtpapi
+                  |> Poison.encode!
 
     email
-      |> Map.drop([:from_name, :x_smtpapi, :reply_to])
+      |> Map.drop([:from_name, :x_smtpapi, :reply_to, :sub])
       |> Map.put(:fromname, from_name)
       |> Map.put(:replyto, reply_to)
-      |> Map.put("x-smtpapi", Poison.encode!(template))
+      |> Map.put("x-smtpapi", x_smtpapi)
   end
+
+  defp full_x_smtpapi(%Email{x_smtpapi: in_smtpapi, sub: nil}), do: in_smtpapi
+  defp full_x_smtpapi(%Email{x_smtpapi: in_smtpapi, sub: sub}), do: Map.put(in_smtpapi, :sub, sub)
 
   defp convert_to_form_data(email) do
     email
@@ -77,12 +84,6 @@ defmodule SendGrid.Mailer do
     |> Enum.join("&")
   end
 
-  defp encode_attribute(key, value) do
-    # Don't modify x-smtpapi
-    if key == "x-smtpapi" do
-      "#{ key }=#{ value }"
-    else
-      "#{ key }=#{ URI.encode_www_form(value) }"
-    end
-  end
+  defp encode_attribute("x-smtpapi", value), do: "x-smtpapi=#{value}"
+  defp encode_attribute(key, value), do: "#{ key }=#{ URI.encode_www_form(value) }"
 end
