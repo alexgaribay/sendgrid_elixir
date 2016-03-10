@@ -45,8 +45,6 @@ defmodule SendGrid.Mailer do
       |> format_email_data
       |> convert_to_form_data
 
-    IO.inspect(payload)
-
     case HTTPoison.post(@api_url <> "mail.send.json", payload, headers) do
       { :ok, %{ status_code: 200 } } -> :ok
       { :ok, %{ body: body } } -> { :error, Poison.decode!(body)["errors"] }
