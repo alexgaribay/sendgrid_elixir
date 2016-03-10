@@ -93,7 +93,7 @@ defmodule SendGrid.Email do
   end
 
   @doc """
-  Deletes a single CC address from the email.
+  Deletes a single `CC` address from the email.
 
       Email.delete_cc(%Email{cc:["test@email.com"]}, "test@email.com"))
       %Email{cc:[]}
