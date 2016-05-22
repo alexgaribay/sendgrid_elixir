@@ -20,7 +20,8 @@ defmodule SendGrid.Mailer do
   """
   @spec send(SendGrid.Email.t) :: :ok | { :error, list(String.t) } | { :error, String.t }
   def send(%Email{} = email) do
-    payload = email
+    payload =
+      email
       |> format_email_data
       |> convert_to_form_data
 
@@ -34,15 +35,16 @@ defmodule SendGrid.Mailer do
   defp format_email_data(%Email{} = email) do
     from_name = email.from_name
     reply_to = email.reply_to
-    x_smtpapi = email
-                  |> full_x_smtpapi
-                  |> Poison.encode!
+    x_smtpapi =
+      email
+      |> full_x_smtpapi
+      |> Poison.encode!
 
     email
-      |> Map.drop([:from_name, :x_smtpapi, :reply_to, :sub])
-      |> Map.put(:fromname, from_name)
-      |> Map.put(:replyto, reply_to)
-      |> Map.put("x-smtpapi", x_smtpapi)
+    |> Map.drop([:from_name, :x_smtpapi, :reply_to, :sub])
+    |> Map.put(:fromname, from_name)
+    |> Map.put(:replyto, reply_to)
+    |> Map.put("x-smtpapi", x_smtpapi)
   end
 
   defp full_x_smtpapi(%Email{x_smtpapi: in_smtpapi, sub: nil}), do: in_smtpapi
