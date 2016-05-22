@@ -6,6 +6,8 @@ defmodule SendGrid.Contacts.Recipients do
   for more detail.
   """
 
+  @base_api_url "/v3/contactdb/recipients"
+
   @doc """
   Adds a contact to the contacts list available in Marketing Campaigns. At a minimum, an email address must provided.
   Additionaly, costom fields that have already been created can added as well.
@@ -18,7 +20,7 @@ defmodule SendGrid.Contacts.Recipients do
   def add(email_address, custom_fields \\ %{}) do
     payload = Map.merge(%{ "email" => email_address }, custom_fields)
 
-    SendGrid.post("/v3/contactdb/recipients", [payload])
+    SendGrid.post(@base_api_url, [payload])
     |> handle_recipient_result
   end
 
