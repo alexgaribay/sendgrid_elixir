@@ -1,4 +1,4 @@
-# SendGridElixir
+# SendGrid
 
 A wrapper for SendGrid's API to create composable emails.
 

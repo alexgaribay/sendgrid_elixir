@@ -1,30 +1,9 @@
 defmodule SendGrid.Mailer do
   @moduledoc """
-  Handles sending transactional email through SendGrid's API.
-
-  ## Configuration
-
-  You must provide a configuration which includes your `api_key`.
-
-  ```
-  config :sendgrid,
-    api_key: "sendgrid_api_key"
-  ```
-
+  Module to send transactional email.
   """
+
   alias SendGrid.Email
-
-  @api_url "https://api.sendgrid.com/api/"
-
-  if !Application.get_env(:sendgrid, :api_key), do: raise "SendGrid is not configured."
-
-  defp headers do
-     api_key = Application.get_env(:sendgrid, :api_key)
-     [
-       { "Content-Type", "application/x-www-form-urlencoded" },
-       { "Authorization", "Bearer #{api_key}" }
-     ]
-  end
 
   @doc """
   Sends the built email.
@@ -45,7 +24,7 @@ defmodule SendGrid.Mailer do
       |> format_email_data
       |> convert_to_form_data
 
-    case HTTPoison.post(@api_url <> "mail.send.json", payload, headers) do
+    case SendGrid.post("/api/mail.send.json", payload, [{ "Content-Type", "application/x-www-form-urlencoded" }]) do
       { :ok, %{ status_code: 200 } } -> :ok
       { :ok, %{ body: body } } -> { :error, Poison.decode!(body)["errors"] }
       _ -> { :error, "Unable to communicate with SendGrid API." }
