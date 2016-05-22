@@ -27,7 +27,7 @@ defmodule SendGrid.Mailer do
 
     case SendGrid.post("/api/mail.send.json", payload, [{ "Content-Type", "application/x-www-form-urlencoded" }]) do
       { :ok, %{ status_code: 200 } } -> :ok
-      { :ok, %{ body: body } } -> { :error, Poison.decode!(body)["errors"] }
+      { :ok, %{ body: body } } -> { :error, body["errors"] }
       _ -> { :error, "Unable to communicate with SendGrid API." }
     end
   end

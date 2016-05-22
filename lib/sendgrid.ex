@@ -32,6 +32,9 @@ defmodule SendGrid do
      }
   end
 
+  defp process_request_body(body) when is_binary(body), do: body
+  defp process_request_body(body), do: Poison.encode!(body)
+
   # Override the base headers with any passed in.
   defp process_request_headers(request_headers) do
     headers =
@@ -40,6 +43,13 @@ defmodule SendGrid do
 
     Map.merge(base_headers, headers)
     |> Enum.into([])
+  end
+
+  defp process_response_body(body) do
+    case Poison.decode(body) do
+      { :ok, data } -> data
+      _ -> body
+    end
   end
 
 end
