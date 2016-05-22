@@ -1,4 +1,4 @@
-defmodule SendgridElixir.Mixfile do
+defmodule SendGrid.Mixfile do
   use Mix.Project
 
   def project do
