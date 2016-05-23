@@ -19,6 +19,13 @@ In one of your configuration files, include your SendGrid API key like this:
       api_key: "SENDGRID_API_KEY"
 ```
 
+Add `:sendgrid` to your list of applications
+```elixir
+    defp application do
+      [applications: [:sendgrid]]
+    end
+```
+
 ## Usage
 
 Check the [docs](https://hexdocs.pm/sendgrid/) for complete usage.
