@@ -1,9 +1,20 @@
 defmodule SendGrid.Mailer do
   @moduledoc """
   Module to send transactional email.
+
+  To send emails in sandbox mode, ensure the config key is set:
+  ```elixir
+      config :sendgrid,
+        api_key: "SENDGRID_API_KEY",
+        sandbox_enable: true
+  ```
   """
 
   alias SendGrid.Email
+
+  @mail_url "/v3/mail/send"
+  @sandbox_mode Application.get_env(:sendgrid, :sandbox_enable) || false
+
 
   @doc """
   Sends the built email.
@@ -22,47 +33,31 @@ defmodule SendGrid.Mailer do
   def send(%Email{} = email) do
     payload =
       email
-      |> format_email_data
-      |> convert_to_form_data
+      |> format_email_for_sending
 
-    case SendGrid.post("/api/mail.send.json", payload, [{ "Content-Type", "application/x-www-form-urlencoded" }]) do
-      { :ok, %{ status_code: 200 } } -> :ok
+    case SendGrid.post(@mail_url, payload, [{ "Content-Type", "application/json" }]) do
+      { :ok, %{ status_code: 202 } } -> :ok
       { :ok, %{ body: body } } -> { :error, body["errors"] }
       _ -> { :error, "Unable to communicate with SendGrid API." }
     end
   end
 
-  defp format_email_data(%Email{} = email) do
-    from_name = email.from_name
-    reply_to = email.reply_to
-    x_smtpapi =
+  defp format_email_for_sending(%Email{} = email) do
+    personalizations =
       email
-      |> full_x_smtpapi
-      |> Poison.encode!
+      |> Map.take([:to, :cc, :bcc, :substitutions])
+      |> Stream.into([])
+      |> Stream.filter(fn { _key, v } -> v != nil && v != [] end)
+      |> Enum.into(%{})
 
-    email
-    |> Map.drop([:from_name, :x_smtpapi, :reply_to, :sub])
-    |> Map.put(:fromname, from_name)
-    |> Map.put(:replyto, reply_to)
-    |> Map.put("x-smtpapi", x_smtpapi)
+    %{
+      personalizations: [personalizations],
+      from: email.from,
+      subject: email.subject,
+      content: email.content,
+      reply_to: email.reply_to,
+      send_at: email.send_at,
+      mail_settings: %{ sandbox_mode: %{ enable: @sandbox_mode } }
+    }
   end
-
-  defp full_x_smtpapi(%Email{x_smtpapi: in_smtpapi, sub: nil}), do: in_smtpapi
-  defp full_x_smtpapi(%Email{x_smtpapi: in_smtpapi, sub: sub}), do: Map.put(in_smtpapi, :sub, sub)
-
-  defp convert_to_form_data(email) do
-    email
-    |> Map.from_struct
-    |> Map.to_list
-    |> Enum.filter_map(fn({ _k, v }) -> v != nil && v != "null" end, fn({ k, v }) -> encode_attribute(k, v) end)
-    |> Enum.join("&")
-  end
-
-  defp encode_attribute(key, list) when is_list(list) do
-    Enum.map(list, fn (item) -> "#{ key }[]=#{ URI.encode_www_form(item) }" end)
-    |> Enum.join("&")
-  end
-
-  defp encode_attribute("x-smtpapi", value), do: "x-smtpapi=#{value}"
-  defp encode_attribute(key, value), do: "#{ key }=#{ URI.encode_www_form(value) }"
 end

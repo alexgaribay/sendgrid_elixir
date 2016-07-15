@@ -19,6 +19,16 @@ In one of your configuration files, include your SendGrid API key like this:
       api_key: "SENDGRID_API_KEY"
 ```
 
+If you'd like to enable sandbox mode (emails won't sent but will be validated), add the setting to your config:
+
+```elixir
+    config :sendgrid,
+      api_key: "SENDGRID_API_KEY",
+      sandbox_enable: true
+```
+
+
+
 Add `:sendgrid` to your list of applications
 ```elixir
     defp application do
