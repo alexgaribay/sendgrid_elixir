@@ -15,25 +15,25 @@ Add the following code to your dependencies in your **`mix.exs`** file:
 In one of your configuration files, include your SendGrid API key like this:
 
 ```elixir
-    config :sendgrid,
-      api_key: "SENDGRID_API_KEY"
+config :sendgrid,
+  api_key: "SENDGRID_API_KEY"
 ```
 
 If you'd like to enable sandbox mode (emails won't send but will be validated), add the setting to your config:
 
 ```elixir
-    config :sendgrid,
-      api_key: "SENDGRID_API_KEY",
-      sandbox_enable: true
+config :sendgrid,
+  api_key: "SENDGRID_API_KEY",
+  sandbox_enable: true
 ```
 
 
 
 Add `:sendgrid` to your list of applications
 ```elixir
-    defp application do
-      [applications: [:sendgrid]]
-    end
+defp application do
+  [applications: [:sendgrid]]
+end
 ```
 
 ## Usage
