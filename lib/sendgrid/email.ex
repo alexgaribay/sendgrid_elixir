@@ -215,9 +215,6 @@ defmodule SendGrid.Email do
     put_in(email.substitutions, Map.put(email.substitutions || %{}, sub_name, sub_value))
   end
 
-  def add_address_to_list(list, address), do: list ++ [%{ email: address }]
-  def add_address_to_list(list, address, name), do: list ++ [%{ email: address, name: name }]
-
   @doc """
   Sets a future date of when to send the email.
 
@@ -228,5 +225,8 @@ defmodule SendGrid.Email do
   def put_send_at(%Email{} = email, send_at) do
     %{ email | send_at: send_at }
   end
+
+  defp add_address_to_list(list, address), do: list ++ [%{ email: address }]
+  defp add_address_to_list(list, address, name), do: list ++ [%{ email: address, name: name }]
 
 end
