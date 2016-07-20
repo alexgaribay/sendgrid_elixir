@@ -34,8 +34,7 @@ defmodule SendGrid.Mailer do
       |> format_email_for_sending
 
     case SendGrid.post(@mail_url, payload, [{ "Content-Type", "application/json" }]) do
-      { :ok, %{ status_code: 202 } } -> :ok
-      { :ok, %{ status_code: 200 } } -> :ok
+      { :ok, %{ status_code: status_code } } when status_code in [200,202] -> :ok
       { :ok, %{ body: body } } -> { :error, body["errors"] }
       _ -> { :error, "Unable to communicate with SendGrid API." }
     end
