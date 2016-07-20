@@ -13,8 +13,6 @@ defmodule SendGrid.Mailer do
   alias SendGrid.Email
 
   @mail_url "/v3/mail/send"
-  @sandbox_mode Application.get_env(:sendgrid, :sandbox_enable) || false
-
 
   @doc """
   Sends the built email.
@@ -36,7 +34,7 @@ defmodule SendGrid.Mailer do
       |> format_email_for_sending
 
     case SendGrid.post(@mail_url, payload, [{ "Content-Type", "application/json" }]) do
-      { :ok, %{ status_code: 202 } } -> :ok
+      { :ok, %{ status_code: status_code } } when status_code in [200,202] -> :ok
       { :ok, %{ body: body } } -> { :error, body["errors"] }
       _ -> { :error, "Unable to communicate with SendGrid API." }
     end
@@ -57,7 +55,10 @@ defmodule SendGrid.Mailer do
       content: email.content,
       reply_to: email.reply_to,
       send_at: email.send_at,
-      mail_settings: %{ sandbox_mode: %{ enable: @sandbox_mode } }
+      template_id: email.template_id,
+      mail_settings: %{ sandbox_mode: %{ enable: sandbox_mode } }
     }
   end
+
+  defp sandbox_mode, do: Application.get_env(:sendgrid, :sandbox_enable) || false
 end
