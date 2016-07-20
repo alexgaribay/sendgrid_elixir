@@ -1,4 +1,18 @@
 # Changelog
+
+## 1.0.2 (2016-7-20)
+
+* Enhancements
+  * [Mailer] sandbox mode is fetched during runtime instead of compile time
+
+* Fixes
+  * [Mailer] add missing insertion of template id
+
+## 1.0.1 (2016-7-16)
+
+* Fixes
+  * [Email] Make an exposed method private 
+
 ## 1.0.0 (2016-7-15)
 
 * Enhancements
