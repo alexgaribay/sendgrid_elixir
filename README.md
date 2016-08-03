@@ -7,7 +7,7 @@ A wrapper for SendGrid's API to create composable emails.
 Add the following code to your dependencies in your **`mix.exs`** file:
 
 ```elixir
-{:sendgrid, "~> 1.0.2"}
+{:sendgrid, "~> 1.0.3"}
 ```
 
 ## Configuration

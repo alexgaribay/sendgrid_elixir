@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.3 (2016-8-3)
+
+* Fixes
+  * replace documentation using to `put_to` with `add_to`
+
 ## 1.0.2 (2016-7-20)
 
 * Enhancements
