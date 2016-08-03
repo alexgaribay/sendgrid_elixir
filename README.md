@@ -48,7 +48,7 @@ alias SendGrid.{Mailer, Email}
 email = 
   Email.build()
   |> Email.put_from("test@email.com")
-  |> Email.put_to("test2@email.com")
+  |> Email.add_to("test2@email.com")
   |> Email.put_subject("Hello From Elixir")
   |> Email.put_text("Sent from Elixir!")
   
@@ -63,7 +63,7 @@ alias SendGrid.{Mailer, Email}
 email = 
   Email.build()
   |> Email.put_from("test@email.com")
-  |> Email.put_to("test2@email.com")
+  |> Email.add_to("test2@email.com")
   |> Email.put_subject("Hello From Elixir")
   |> Email.put_html("<html><body><p>Sent from Elixir!</p></body></html>")
   

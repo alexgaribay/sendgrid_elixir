@@ -19,7 +19,7 @@ defmodule SendGrid.Mailer do
 
       email =
         Email.build()
-        |> Email.put_to("test@email.com")
+        |> Email.add_to("test@email.com")
         |> Email.put_from("test2@email.com")
         |> Email.put_subject("Hello from Elixir")
         |> Email.put_text("Sent with Elixir")
