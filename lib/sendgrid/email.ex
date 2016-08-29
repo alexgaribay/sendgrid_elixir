@@ -28,7 +28,8 @@ defmodule SendGrid.Email do
             content: nil,
             template_id: nil,
             substitutions: nil,
-            send_at: nil
+            send_at: nil,
+            headers: nil
 
 
   @type t :: %Email{to: nil | [recipient],
@@ -40,10 +41,12 @@ defmodule SendGrid.Email do
                     content: nil | [content],
                     template_id: nil | String.t,
                     substitutions: nil | substitutions,
-                    send_at: nil | integer }
+                    send_at: nil | integer,
+                    headers: nil | [header] }
 
   @type recipient :: %{ email: String.t, name: String.t | nil }
   @type content :: %{ type: String.t, value: String.t }
+  @type header :: { String.t, String.t }
 
   @type substitutions :: %{ String.t => String.t }
 
@@ -189,6 +192,22 @@ defmodule SendGrid.Email do
         put_in(email.content, [head | %{ type: "text/html", value: html_body }])
       _ ->
         put_in(email.content, (email.content || []) ++ [%{ type: "text/html", value: html_body }])
+    end
+  end
+
+  @doc """
+  Sets an custom header.
+
+      Email.put_header(%Email{}, "HEADER_KEY", "HEADER_VALUE")
+
+  """
+  @spec put_header(Email.t, String.t, String.t) :: Email.t
+  def put_header(%Email{} = email, header_key, header_value) do
+    case email.headers do
+      nil ->
+        put_in(email.headers, [{ header_key, header_value }])
+      headers ->
+        put_in(email.headers, headers ++ [{ header_key, header_value }])
     end
   end
 
