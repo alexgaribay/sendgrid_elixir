@@ -126,6 +126,13 @@ defmodule SendGrid.Email.Test do
     assert email.content == [%{ type: "text/plain", value: text }, %{ type: "text/html", value: html }]
   end
 
+  test "add_header/3" do
+    header_key = "SOME_KEY"
+    header_value = "SOME_VALUE"
+    email = Email.add_header(Email.build(), header_key, header_value)
+    assert email.headers == [{header_key, header_value}]
+  end
+
   test "put_template/2" do
     template_id = "some_unique_id"
     email = Email.put_template(Email.build(), template_id)
