@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.0 (2016-8-30)
+
+* Enhancements
+  * add `add_header` to be sent with an email
+
 ## 1.0.3 (2016-8-3)
 
 * Fixes
