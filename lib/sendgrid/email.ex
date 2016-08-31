@@ -198,11 +198,11 @@ defmodule SendGrid.Email do
   @doc """
   Sets an custom header.
 
-      Email.put_header(%Email{}, "HEADER_KEY", "HEADER_VALUE")
+      Email.add_header(%Email{}, "HEADER_KEY", "HEADER_VALUE")
 
   """
-  @spec put_header(Email.t, String.t, String.t) :: Email.t
-  def put_header(%Email{} = email, header_key, header_value) do
+  @spec add_header(Email.t, String.t, String.t) :: Email.t
+  def add_header(%Email{} = email, header_key, header_value) do
     case email.headers do
       nil ->
         put_in(email.headers, [{ header_key, header_value }])
