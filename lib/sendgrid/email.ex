@@ -29,7 +29,8 @@ defmodule SendGrid.Email do
             template_id: nil,
             substitutions: nil,
             send_at: nil,
-            headers: nil
+            headers: nil,
+            attachments: nil
 
 
   @type t :: %Email{to: nil | [recipient],
@@ -42,11 +43,13 @@ defmodule SendGrid.Email do
                     template_id: nil | String.t,
                     substitutions: nil | substitutions,
                     send_at: nil | integer,
-                    headers: nil | [header] }
+                    headers: nil | [header],
+                    attachments: nil | [attachment]}
 
   @type recipient :: %{ email: String.t, name: String.t | nil }
   @type content :: %{ type: String.t, value: String.t }
   @type header :: { String.t, String.t }
+  @type attachment :: %{content: String.t, type: String.t, filename: String.t, disposition: String.t, content_id: String.t}
 
   @type substitutions :: %{ String.t => String.t }
 
@@ -132,6 +135,24 @@ defmodule SendGrid.Email do
   @spec add_bcc(Email.t, String.t, String.t) :: Email.t
   def add_bcc(%Email{} = email, bcc_address, bcc_name) do
     put_in(email.bcc, add_address_to_list(email.bcc || [], bcc_address, bcc_name))
+  end
+
+  @doc """
+  Adds an attachment to the email. An attachment is a map with the keys:
+    * content
+    * type
+    filename
+    * disposition
+    * content_id
+  """
+
+  @spec add_attachment(Email.t, Attachment.t) :: Email.t
+  def add_attachment(%Email{} = email, attachment) do
+    attachments = case email.attachments do
+      nil -> [attachment]
+      list -> list ++ [attachment]
+    end
+    %{email | attachments: attachments}
   end
 
   @doc """
