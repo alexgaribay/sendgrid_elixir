@@ -141,11 +141,14 @@ defmodule SendGrid.Email do
   Adds an attachment to the email. An attachment is a map with the keys:
     * content
     * type
-    filename
+    * filename
     * disposition
     * content_id
-  """
 
+      attachment = %{content: "base64string", filename: "image.jpg"}
+      Email.add_attachment(%Email{}, attachemnt}
+
+  """
   @spec add_attachment(Email.t, Attachment.t) :: Email.t
   def add_attachment(%Email{} = email, attachment) do
     attachments = case email.attachments do

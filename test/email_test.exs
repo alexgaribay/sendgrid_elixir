@@ -166,21 +166,25 @@ defmodule SendGrid.Email.Test do
     |> SendGrid.Mailer.send()
   end
 
-  test "add_attachment" do
-    attachment = %{content: "somebase64encodedstring", type: "image/jpeg", filename: "testing.jpg"}
-    email = Email.build()
-      |> Email.add_attachment(attachment)
-    assert email.attachments == [attachment]
-    assert Enum.count(email.attachments) == 1
-  end
+  describe "add_attachemnt/2" do
+    test "adds a single attachemnt" do
+      attachment = %{content: "somebase64encodedstring", type: "image/jpeg", filename: "testing.jpg"}
+      email =
+        Email.build()
+        |> Email.add_attachment(attachment)
+      assert email.attachments == [attachment]
+      assert Enum.count(email.attachments) == 1
+    end
 
-  test "add_attachment multiple" do
-    attachment1 = %{content: "somebase64encodedstring", type: "image/jpeg", filename: "testing.jpg"}
-    attachment2 = %{content: "somebase64encodedstring2", type: "image/png", filename: "testing2.jpg"}
-    email = Email.build()
-      |> Email.add_attachment(attachment1)
-      |> Email.add_attachment(attachment2)
-    assert email.attachments == [attachment1, attachment2]
-    assert Enum.count(email.attachments) == 2
+    test "appends to attachment list" do
+      attachment1 = %{content: "somebase64encodedstring", type: "image/jpeg", filename: "testing.jpg"}
+      attachment2 = %{content: "somebase64encodedstring2", type: "image/png", filename: "testing2.jpg"}
+      email =
+        Email.build()
+        |> Email.add_attachment(attachment1)
+        |> Email.add_attachment(attachment2)
+      assert email.attachments == [attachment1, attachment2]
+      assert Enum.count(email.attachments) == 2
+    end
   end
 end
