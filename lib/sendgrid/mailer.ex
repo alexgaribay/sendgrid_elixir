@@ -56,6 +56,7 @@ defmodule SendGrid.Mailer do
       reply_to: email.reply_to,
       send_at: email.send_at,
       template_id: email.template_id,
+      attachments: email.attachments,
       mail_settings: %{ sandbox_mode: %{ enable: sandbox_mode } }
     }
   end
