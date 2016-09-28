@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.0 (2016-9-28)
+* Enhancements
+  * add `add_attachment` for attachements
+  * bump `:poison` version to 2
+
 ## 1.1.0 (2016-8-30)
 
 * Enhancements
