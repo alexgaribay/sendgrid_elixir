@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.3.0 (2016-11-5)
+* Enhancements
+  * add `add_custom_arg` for attachments
+  * remove `raise` when no API key is provided at compile-time
+  
 ## 1.2.0 (2016-9-28)
 * Enhancements
   * add `add_attachment` for attachments
