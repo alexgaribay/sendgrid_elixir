@@ -17,15 +17,16 @@ defmodule SendGrid do
 
   @api_url "https://api.sendgrid.com"
 
-  if !Application.get_env(:sendgrid, :api_key), do: raise "SendGrid is not configured."
-
   defp process_url(url) do
     @api_url <> url
   end
 
+  defp api_key do
+    Application.get_env(:sendgrid, :api_key)
+  end
+
   # Default headers to be sent.
   defp base_headers do
-     api_key = Application.get_env(:sendgrid, :api_key)
      %{
        "Content-Type" => "application/json",
        "Authorization" => "Bearer #{api_key}"
