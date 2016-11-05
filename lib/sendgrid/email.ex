@@ -28,6 +28,7 @@ defmodule SendGrid.Email do
             content: nil,
             template_id: nil,
             substitutions: nil,
+            custom_args: nil,
             send_at: nil,
             headers: nil,
             attachments: nil
@@ -42,6 +43,7 @@ defmodule SendGrid.Email do
                     content: nil | [content],
                     template_id: nil | String.t,
                     substitutions: nil | substitutions,
+                    custom_args: nil | custom_args,
                     send_at: nil | integer,
                     headers: nil | [header],
                     attachments: nil | [attachment]}
@@ -52,6 +54,7 @@ defmodule SendGrid.Email do
   @type attachment :: %{content: String.t, type: String.t, filename: String.t, disposition: String.t, content_id: String.t}
 
   @type substitutions :: %{ String.t => String.t }
+  @type custom_args :: %{ String.t => String.t }
 
   @doc"""
   Builds an an empty email to compose on.
@@ -256,6 +259,18 @@ defmodule SendGrid.Email do
   @spec add_substitution(Email.t, String.t, String.t) :: Email.t
   def add_substitution(%Email{} = email, sub_name, sub_value) do
     put_in(email.substitutions, Map.put(email.substitutions || %{}, sub_name, sub_value))
+  end
+
+  @doc """
+  Adds a custom_arg value to the email.
+  This function replaces existing key values.
+
+      Email.add_custom_arg(%Email{}, "-sentIn-", "Elixir")
+
+  """
+  @spec add_custom_arg(Email.t, String.t, String.t) :: Email.t
+  def add_custom_arg(%Email{} = email, sub_name, sub_value) do
+    put_in(email.custom_args, Map.put(email.custom_args || %{}, sub_name, sub_value))
   end
 
   @doc """

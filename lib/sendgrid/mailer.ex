@@ -43,7 +43,7 @@ defmodule SendGrid.Mailer do
   defp format_email_for_sending(%Email{} = email) do
     personalizations =
       email
-      |> Map.take([:to, :cc, :bcc, :substitutions])
+      |> Map.take([:to, :cc, :bcc, :substitutions, :custom_args])
       |> Stream.into([])
       |> Stream.filter(fn { _key, v } -> v != nil && v != [] end)
       |> Enum.into(%{})

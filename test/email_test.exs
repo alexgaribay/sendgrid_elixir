@@ -150,6 +150,24 @@ defmodule SendGrid.Email.Test do
     assert email.substitutions == %{ "-someValue-" => "Cool", "-newValue-" => "Panda" }
   end
 
+  test "add_custom_arg/3" do
+    email = Email.add_custom_arg(Email.build(), "unique_user_id", "abc123")
+    assert email.custom_args == %{ "unique_user_id" => "abc123" }
+  end
+
+  test "add_custom_arg/3 x2" do
+    email = Email.add_custom_arg(Email.build(), "unique_user_id", "abc123")
+            |> Email.add_custom_arg("template_name", "welcome-user")
+    assert email.custom_args == %{ "unique_user_id" => "abc123", "template_name" => "welcome-user" }
+  end
+
+  test "add_custom_arg/3 does not create duplicate keys" do
+    email = Email.add_custom_arg(Email.build(), "unique_user_id", "abc123")
+            |> Email.add_custom_arg("template_name", "welcome-user")
+            |> Email.add_custom_arg("template_name", "new_template")
+    assert email.custom_args == %{ "unique_user_id" => "abc123", "template_name" => "new_template" }
+  end
+
   test "put_send_at/2" do
     time = 123456789
     email = Email.put_send_at(Email.build(), time)
