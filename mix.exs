@@ -5,13 +5,13 @@ defmodule SendGrid.Mixfile do
     [app: :sendgrid,
      version: "1.3.0",
      elixir: "~> 1.2",
-     package: package,
-     description: description,
-     source_url: project_url,
-     homepage_url: project_url,
+     package: package(),
+     description: description(),
+     source_url: project_url(),
+     homepage_url: project_url(),
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
-     deps: deps]
+     deps: deps()]
   end
 
   def application do
@@ -49,7 +49,7 @@ defmodule SendGrid.Mixfile do
       files: ["lib", "mix.exs", "LICENSE", "README.md"],
       maintainers: ["Alex Garibay"],
       licenses: ["MIT"],
-      links: %{"GitHub" => project_url}
+      links: %{"GitHub" => project_url()}
     ]
   end
 
