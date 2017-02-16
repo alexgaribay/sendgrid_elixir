@@ -57,9 +57,9 @@ defmodule SendGrid.Mailer do
       send_at: email.send_at,
       template_id: email.template_id,
       attachments: email.attachments,
-      mail_settings: %{ sandbox_mode: %{ enable: sandbox_mode } }
+      mail_settings: %{ sandbox_mode: %{ enable: sandbox_mode() } }
     }
   end
 
-  defp sandbox_mode, do: Application.get_env(:sendgrid, :sandbox_enable) || false
+  defp sandbox_mode(), do: Application.get_env(:sendgrid, :sandbox_enable) || false
 end

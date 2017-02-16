@@ -21,15 +21,15 @@ defmodule SendGrid do
     @api_url <> url
   end
 
-  defp api_key do
+  defp api_key() do
     Application.get_env(:sendgrid, :api_key)
   end
 
   # Default headers to be sent.
-  defp base_headers do
+  defp base_headers() do
      %{
        "Content-Type" => "application/json",
-       "Authorization" => "Bearer #{api_key}"
+       "Authorization" => "Bearer #{api_key()}"
      }
   end
 
@@ -42,7 +42,7 @@ defmodule SendGrid do
       request_headers
       |> Enum.into(%{})
 
-    Map.merge(base_headers, headers)
+    Map.merge(base_headers(), headers)
     |> Enum.into([])
   end
 
