@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.4.0 (2017-2-15)
+* Enhancements
+  * update `httpoison` to 0.11.0 and `poison` to 3.0
+  * clean up compiler warnings when using Elixir 1.3
+
 ## 1.3.0 (2016-11-5)
 * Enhancements
   * add `add_custom_arg` for custom arguments
