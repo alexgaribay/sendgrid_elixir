@@ -1,13 +1,17 @@
 defmodule SendGrid.Mailer do
   @moduledoc """
-  Module to send transactional email.
+  Module for sending transactional email.
 
+  ## Sandbox Mode
+  
+  Sandbox mode allows you to test sending emails without actually delivering emails and using your email quota.
+  
   To send emails in sandbox mode, ensure the config key is set:
-  ```elixir
+
       config :sendgrid,
         api_key: "SENDGRID_API_KEY",
         sandbox_enable: true
-  ```
+  
   """
 
   alias SendGrid.Email
@@ -17,6 +21,8 @@ defmodule SendGrid.Mailer do
   @doc """
   Sends the built email.
 
+  ## Examples
+
       email =
         Email.build()
         |> Email.add_to("test@email.com")
@@ -25,18 +31,16 @@ defmodule SendGrid.Mailer do
         |> Email.put_text("Sent with Elixir")
 
       :ok = Mailer.send(email)
-
+      
   """
-  @spec send(SendGrid.Email.t) :: :ok | { :error, list(String.t) } | { :error, String.t }
+  @spec send(SendGrid.Email.t) :: :ok | {:error, [String.t]} | {:error, String.t}
   def send(%Email{} = email) do
-    payload =
-      email
-      |> format_email_for_sending
+    payload = format_email_for_sending(email)
 
-    case SendGrid.post(@mail_url, payload, [{ "Content-Type", "application/json" }] ++ (email.headers || []) ) do
-      { :ok, %{ status_code: status_code } } when status_code in [200,202] -> :ok
-      { :ok, %{ body: body } } -> { :error, body["errors"] }
-      _ -> { :error, "Unable to communicate with SendGrid API." }
+    case SendGrid.post(@mail_url, payload, [{"Content-Type", "application/json"}] ++ List.wrap(email.headers)) do
+      {:ok, %{status_code: status_code}} when status_code in [200,202] -> :ok
+      {:ok, %{body: body}} -> {:error, body["errors"]}
+      _ -> {:error, "Unable to communicate with SendGrid API."}
     end
   end
 
@@ -57,7 +61,7 @@ defmodule SendGrid.Mailer do
       send_at: email.send_at,
       template_id: email.template_id,
       attachments: email.attachments,
-      mail_settings: %{ sandbox_mode: %{ enable: sandbox_mode() } }
+      mail_settings: %{sandbox_mode: %{enable: sandbox_mode()}}
     }
   end
 

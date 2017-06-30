@@ -2,12 +2,13 @@ defmodule SendGrid.Email do
   @moduledoc """
   Email primitive for composing emails with SendGrid's API.
 
-      Email.build()
-        |> Email.add_to("test@email.com")
-        |> Email.put_from("test2@email.com")
-        |> Email.put_subject("Hello from Elixir")
-        |> Email.put_text("Sent with Elixir")
+  ## Examples
 
+      iex> Email.build()
+      ...> |> Email.add_to("test@email.com")
+      ...> |> Email.put_from("test2@email.com")
+      ...> |> Email.put_subject("Hello from Elixir")
+      ...> |> Email.put_text("Sent with Elixir")
       %Email{
         to: %{ email: "test@email.com" },
         from %{ email: "test2@email.com" },
@@ -56,235 +57,287 @@ defmodule SendGrid.Email do
   @type substitutions :: %{ String.t => String.t }
   @type custom_args :: %{ String.t => String.t }
 
-  @doc"""
+  @doc """
   Builds an an empty email to compose on.
 
-      Email.build()
-      # %Email{...}
+  ## Examples
+
+      iex> build()
+      %Email{...}
 
   """
-  @spec build() :: Email.t
-  def build() do
+  @spec build :: t
+  def build do
     %Email{}
   end
 
   @doc """
   Sets the `to` field for the email. A to-name can be passed as the third parameter.
 
-      Email.add_to(%Email{}, "test@email.com")
+  ## Examples
 
-      Email.add_to(%Email{}, "test@email.com", "John Doe")
+      add_to(%Email{}, "test@email.com")
+      add_to(%Email{}, "test@email.com", "John Doe")
 
   """
-  @spec add_to(Email.t, String.t) :: Email.t
-  def add_to(%Email{} = email, to_address) do
-    put_in(email.to, add_address_to_list(email.to || [], to_address))
+  @spec add_to(t, String.t) :: t
+  def add_to(%Email{to: to} = email, to_address) do
+    addresses = add_address_to_list(to, to_address)
+    %Email{email | to: addresses}
   end
 
-  @spec add_to(Email.t, String.t, String.t) :: Email.t
-  def add_to(%Email{} = email, to_address, to_name) do
-    put_in(email.to,  add_address_to_list(email.to || [], to_address, to_name))
+  @spec add_to(t, String.t, String.t) :: t
+  def add_to(%Email{to: to} = email, to_address, to_name) do
+    addresses = add_address_to_list(to, to_address, to_name)
+    %Email{email | to: addresses}
   end
 
   @doc """
   Sets the `from` field for the email. The from-name can be specified as the third parameter.
 
-      Email.put_from(%Email{}, "test@email.com")
+  ## Examples
 
-      Email.put_from(%Email{}, "test@email.com", "John Doe")
+      put_from(%Email{}, "test@email.com")
+      put_from(%Email{}, "test@email.com", "John Doe")
 
   """
-  @spec put_from(Email.t, String.t) :: Email.t
+  @spec put_from(t, String.t) :: t
   def put_from(%Email{} = email, from_address) do
-    put_in(email.from, %{ email: from_address })
+    %Email{email | from: address(from_address)}
   end
 
-  @spec put_from(Email.t, String.t, String.t) :: Email.t
+  @spec put_from(t, String.t, String.t) :: t
   def put_from(%Email{} = email, from_address, from_name) do
-    put_in(email.from, %{ email: from_address, name: from_name })
+    %Email{email | from: address(from_address, from_name)} 
   end
 
   @doc """
   Add recipients to the `CC` address field. The cc-name can be specified as the third parameter.
 
-      Email.add_cc(%Email{}, "test@email.com")
+  ## Examples
 
-      Email.add_cc(%Email{}, "test@email.com", "John Doe")
+      add_cc(%Email{}, "test@email.com")
+      add_cc(%Email{}, "test@email.com", "John Doe")
 
   """
-  @spec add_cc(Email.t, String.t) :: Email.t
-  def add_cc(%Email{} = email, cc_address) do
-    put_in(email.cc, add_address_to_list(email.cc || [], cc_address))
+  @spec add_cc(t, String.t) :: t
+  def add_cc(%Email{cc: cc} = email, cc_address) do
+    addresses = add_address_to_list(cc, cc_address)
+    %Email{email | cc: addresses}
   end
 
   @spec add_cc(Email.t, String.t, String.t) :: Email.t
-  def add_cc(%Email{} = email, cc_address, cc_name) do
-    put_in(email.cc, add_address_to_list(email.cc || [], cc_address, cc_name))
+  def add_cc(%Email{cc: cc} = email, cc_address, cc_name) do
+    addresses = add_address_to_list(cc, cc_address, cc_name)
+    %Email{email | cc: addresses}
   end
 
   @doc """
   Add recipients to the `BCC` address field. The bcc-name can be specified as the third parameter.
 
-      Email.add_bcc(%Email{}, "test@email.com")
+  ## Examples
 
-      Email.add_bcc(%Email{}, "test@email.com", "John Doe")
+      add_bcc(%Email{}, "test@email.com")
+      add_bcc(%Email{}, "test@email.com", "John Doe")
 
   """
-  @spec add_bcc(Email.t, String.t) :: Email.t
-  def add_bcc(%Email{} = email, bcc_address) do
-    put_in(email.bcc, add_address_to_list(email.bcc || [], bcc_address))
+  @spec add_bcc(t, String.t) :: t
+  def add_bcc(%Email{bcc: bcc} = email, bcc_address) do
+    addresses = add_address_to_list(bcc, bcc_address)
+    %Email{email | bcc: addresses}
   end
 
-  @spec add_bcc(Email.t, String.t, String.t) :: Email.t
-  def add_bcc(%Email{} = email, bcc_address, bcc_name) do
-    put_in(email.bcc, add_address_to_list(email.bcc || [], bcc_address, bcc_name))
+  @spec add_bcc(t, String.t, String.t) :: t
+  def add_bcc(%Email{bcc: bcc} = email, bcc_address, bcc_name) do
+    addresses = add_address_to_list(bcc, bcc_address, bcc_name)
+    %Email{email | bcc: addresses}
   end
 
   @doc """
-  Adds an attachment to the email. An attachment is a map with the keys:
-    * content
-    * type
-    * filename
-    * disposition
-    * content_id
+  Adds an attachment to the email. 
+  
+  An attachment is a map with the keys:
+
+    * `:content`
+    * `:type`
+    * `:filename`
+    * `:disposition`
+    * `:content_id`
+
+  ## Examples
 
       attachment = %{content: "base64string", filename: "image.jpg"}
-      Email.add_attachment(%Email{}, attachemnt}
+      add_attachment(%Email{}, attachment}
 
   """
-  @spec add_attachment(Email.t, Attachment.t) :: Email.t
+  @spec add_attachment(t, attachment) :: t
   def add_attachment(%Email{} = email, attachment) do
-    attachments = case email.attachments do
-      nil -> [attachment]
-      list -> list ++ [attachment]
-    end
-    %{email | attachments: attachments}
+    attachments = 
+      case email.attachments do
+        nil -> [attachment]
+        list -> list ++ [attachment]
+      end
+    %Email{email | attachments: attachments}
   end
 
   @doc """
   Sets the `reply_to` field for the email. The reply-to name can be specified as the third parameter.
 
-      Email.put_reply_to(%Email{}, "test@email.com")
+  ## Examples
 
-      Email.put_reply_to(%Email{}, "test@email.com", "John Doe")
+      put_reply_to(%Email{}, "test@email.com")
+      put_reply_to(%Email{}, "test@email.com", "John Doe")
 
   """
-  @spec put_reply_to(Email.t, String.t) :: Email.t
+  @spec put_reply_to(t, String.t) :: t
   def put_reply_to(%Email{} = email, reply_to_address) do
-    put_in(email.reply_to, %{ email: reply_to_address })
+    %Email{email | reply_to: address(reply_to_address)}
   end
 
-  @spec put_reply_to(Email.t, String.t, String.t) :: Email.t
+  @spec put_reply_to(t, String.t, String.t) :: t
   def put_reply_to(%Email{} = email, reply_to_address, reply_to_name) do
-    put_in(email.reply_to, %{ email: reply_to_address, name: reply_to_name} )
+    %Email{email | reply_to: address(reply_to_address, reply_to_name)}
   end
 
   @doc """
   Sets the `subject` field for the email.
 
-      Email.put_subject(%Email{}, "Hello from Elixir")
+  ## Examples
+  
+      put_subject(%Email{}, "Hello from Elixir")
 
   """
-  @spec put_subject(Email.t, String.t) :: Email.t
+  @spec put_subject(t, String.t) :: t
   def put_subject(%Email{} = email, subject) do
-    %{ email | subject: subject }
+    %Email{email | subject: subject}
   end
 
   @doc """
   Sets `text` content of the email.
 
-      Email.put_text(%Email{}, "Sent from Elixir!")
+  ## Examples
+
+      put_text(%Email{}, "Sent from Elixir!")
 
   """
-  @spec put_text(Email.t, String.t) :: Email.t
-  def put_text(%Email{} = email, text_body) do
-    case email.content do
-      [ %{ type: "text/plain" } | tail ] ->
-        put_in(email.content, [%{ type: "text/plain", value: text_body } | tail ])
-      _ ->
-        put_in(email.content,  [%{ type: "text/plain", value: text_body }] ++ (email.content || []))
-    end
+  @spec put_text(t, String.t) :: t
+  def put_text(%Email{content: [%{type: "text/plain"} | tail]} = email, text_body) do
+    content = [%{type: "text/plain", value: text_body} | tail]
+    %Email{email | content: content}
+  end
+  def put_text(%Email{content: content} = email, text_body) do
+    content = [%{type: "text/plain", value: text_body} | List.wrap(content)]  
+    %Email{email | content: content}
   end
 
   @doc """
   Sets the `html` content of the email.
 
+  ## Examples
+
       Email.put_html(%Email{}, "<html><body><p>Sent from Elixir!</p></body></html>")
 
   """
-  @spec put_html(Email.t, String.t) :: Email.t
-  def put_html(%Email{} = email, html_body) do
-    case email.content do
-      [ head | %{ type: "text/html" } ] ->
-        put_in(email.content, [head | %{ type: "text/html", value: html_body }])
-      _ ->
-        put_in(email.content, (email.content || []) ++ [%{ type: "text/html", value: html_body }])
-    end
+  @spec put_html(t, String.t) :: t
+  def put_html(%Email{content: [head | %{type: "text/html"}]} = email, html_body) do
+    content = [head | %{type: "text/html", value: html_body}]
+    %Email{email | content: content}
+  end
+  def put_html(%Email{content: content} = email, html_body) do
+    content = List.wrap(content) ++ [%{type: "text/html", value: html_body}]
+    %Email{email | content: content}
   end
 
   @doc """
-  Sets an custom header.
+  Sets a custom header.
+
+  ## Examples
 
       Email.add_header(%Email{}, "HEADER_KEY", "HEADER_VALUE")
 
   """
-  @spec add_header(Email.t, String.t, String.t) :: Email.t
-  def add_header(%Email{} = email, header_key, header_value) do
-    case email.headers do
-      nil ->
-        put_in(email.headers, [{ header_key, header_value }])
-      headers ->
-        put_in(email.headers, headers ++ [{ header_key, header_value }])
-    end
+  @spec add_header(t, String.t, String.t) :: t
+  def add_header(%Email{headers: nil} = email, header_key, header_value) do
+    %Email{email | headers: [{header_key, header_value}]}
   end
-
+  def add_header(%Email{headers: [_|_] = headers} = email, header_key, header_value) do
+    headers = headers ++ [{header_key, header_value}]
+    %Email{email | headers: headers}
+  end
+  
   @doc """
-  Uses a predefined template for the email.
+  Uses a predefined SendGrid template for the email.
+
+  ## Examples
 
       Email.put_template(%Email{}, "the_template_id")
 
   """
-  @spec put_template(Email.t, String.t) :: Email.t
+  @spec put_template(t, String.t) :: t
   def put_template(%Email{} = email, template_id) do
-    %{ email | template_id: template_id }
+    %Email{email | template_id: template_id}
   end
 
   @doc """
-  Adds a subtitution value to be used with a template.
-  This function replaces existing key values.
+  Adds a substitution value to be used with a template.
+
+  If a substitution for a given name is already set, it will be replaced when adding 
+  a substitution with the same name.
+
+  ## Examples
 
       Email.add_substitution(%Email{}, "-sentIn-", "Elixir")
 
   """
-  @spec add_substitution(Email.t, String.t, String.t) :: Email.t
-  def add_substitution(%Email{} = email, sub_name, sub_value) do
-    put_in(email.substitutions, Map.put(email.substitutions || %{}, sub_name, sub_value))
+  @spec add_substitution(t, String.t, String.t) :: t
+  def add_substitution(%Email{substitutions: substitutions} = email, sub_name, sub_value) do
+    substitutions = Map.put(substitutions || %{}, sub_name, sub_value)
+    %Email{email | substitutions: substitutions}
   end
 
   @doc """
   Adds a custom_arg value to the email.
-  This function replaces existing key values.
+
+  If an argument for a given name is already set, it will be replaced when adding 
+  a argument with the same name.
+
+  ## Examples
 
       Email.add_custom_arg(%Email{}, "-sentIn-", "Elixir")
 
   """
-  @spec add_custom_arg(Email.t, String.t, String.t) :: Email.t
-  def add_custom_arg(%Email{} = email, sub_name, sub_value) do
-    put_in(email.custom_args, Map.put(email.custom_args || %{}, sub_name, sub_value))
+  @spec add_custom_arg(t, String.t, String.t) :: t
+  def add_custom_arg(%Email{custom_args: custom_args} = email, arg_name, arg_value) do
+    custom_args = Map.put(custom_args || %{}, arg_name, arg_value)
+    %Email{email | custom_args: custom_args}
   end
 
   @doc """
   Sets a future date of when to send the email.
 
+  ## Examples
+
       Email.put_send_at(%Email{}, 1409348513)
 
   """
-  @spec put_send_at(Email.t, integer) :: Email.t
+  @spec put_send_at(t, integer) :: t
   def put_send_at(%Email{} = email, send_at) do
-    %{ email | send_at: send_at }
+    %Email{email | send_at: send_at}
   end
 
-  defp add_address_to_list(list, address), do: list ++ [%{ email: address }]
-  defp add_address_to_list(list, address, name), do: list ++ [%{ email: address, name: name }]
+  defp address(email), do: %{email: email}
+  defp address(email, name), do: %{email: email, name: name}
 
+  defp add_address_to_list(nil, email) do
+    [address(email)]
+  end
+  defp add_address_to_list(list, email) when is_list(list) do
+    list ++ [address(email)]
+  end
+  defp add_address_to_list(nil, email, name) do
+    [address(email, name)]
+  end
+  defp add_address_to_list(list, email, name) when is_list(list) do
+     list ++ [address(email, name)]
+  end
 end

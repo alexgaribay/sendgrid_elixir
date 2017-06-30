@@ -1,16 +1,19 @@
 defmodule SendGrid do
   @moduledoc """
-  Base module for interacting with SendGrid's API. A configured API key must
-  be provided in your applications project's configuration.
-
+  Interface to SendGrid's API.
+  
   ## Configuration
 
-  You must provide a configuration which includes your `api_key`.
+  A configuration key is expected with a working SendGrid API key.
 
-  ```
-  config :sendgrid,
-    api_key: "sendgrid_api_key"
-  ```
+      config :sendgrid,
+        api_key: "sendgrid_api_key"
+
+  ## Usage
+
+  Most usage with this library will be with composing transactional emails. Refer to `SendGrid.Email` for full 
+  documentation and usage.
+  
   """
 
   use HTTPoison.Base

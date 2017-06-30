@@ -1,7 +1,5 @@
 defmodule SendGrid.Email.Test do
   use ExUnit.Case, async: true
-  doctest SendGrid.Email, import: true
-
   alias SendGrid.Email
 
   @email "test@email.com"
@@ -13,12 +11,12 @@ defmodule SendGrid.Email.Test do
 
   test "add_to/2" do
     email = Email.add_to(Email.build(), @email)
-    assert email.to == [%{ email: @email }]
+    assert email.to == [%{email: @email}]
   end
 
   test "add_to/3" do
     email = Email.add_to(Email.build(), @email, @name)
-    assert email.to == [%{ email: @email, name: @name }]
+    assert email.to == [%{email: @email, name: @name}]
   end
 
   test "add_to with multiple addresses" do
@@ -27,27 +25,27 @@ defmodule SendGrid.Email.Test do
       |> Email.add_to(@email)
       |> Email.add_to(@email, @name)
 
-    assert email.to == [%{ email: @email }, %{ email: @email, name: @name }]
+    assert email.to == [%{email: @email}, %{email: @email, name: @name}]
   end
 
   test "put_from/2" do
     email = Email.put_from(Email.build(), @email)
-    assert email.from == %{ email: @email }
+    assert email.from == %{email: @email}
   end
 
   test "put_from/3" do
     email = Email.put_from(Email.build(), @email, @name)
-    assert email.from == %{ email: @email, name: @name }
+    assert email.from == %{email: @email, name: @name}
   end
 
   test "add_cc/2" do
     email = Email.add_cc(Email.build(), @email)
-    assert email.cc == [%{ email: @email }]
+    assert email.cc == [%{email: @email}]
   end
 
   test "add_cc/3" do
     email = Email.add_cc(Email.build(), @email, @name)
-    assert email.cc == [%{ email: @email, name: @name }]
+    assert email.cc == [%{email: @email, name: @name}]
   end
 
   test "add_cc with multiple addresses" do
@@ -56,17 +54,17 @@ defmodule SendGrid.Email.Test do
       |> Email.add_cc(@email)
       |> Email.add_cc(@email, @name)
 
-    assert email.cc == [%{ email: @email }, %{ email: @email, name: @name }]
+    assert email.cc == [%{email: @email }, %{email: @email, name: @name}]
   end
 
   test "add_bcc/2" do
     email = Email.add_bcc(Email.build(), @email)
-    assert email.bcc == [%{ email: @email }]
+    assert email.bcc == [%{email: @email}]
   end
 
   test "add_bcc/3" do
     email = Email.add_bcc(Email.build(), @email, @name)
-    assert email.bcc == [%{ email: @email, name: @name }]
+    assert email.bcc == [%{email: @email, name: @name}]
   end
 
   test "add_bcc with multiple addresses" do
@@ -75,17 +73,17 @@ defmodule SendGrid.Email.Test do
       |> Email.add_bcc(@email)
       |> Email.add_bcc(@email, @name)
 
-    assert email.bcc == [%{ email: @email }, %{ email: @email, name: @name }]
+    assert email.bcc == [%{email: @email}, %{email: @email, name: @name}]
   end
 
   test "put_reply_to/2" do
     email = Email.put_reply_to(Email.build(), @email)
-    assert email.reply_to == %{ email: @email }
+    assert email.reply_to == %{email: @email}
   end
 
   test "put_reply_to/3" do
     email = Email.put_reply_to(Email.build(), @email, @name)
-    assert email.reply_to == %{ email: @email, name: @name}
+    assert email.reply_to == %{email: @email, name: @name}
   end
 
   test "put_subject/2" do
@@ -97,13 +95,13 @@ defmodule SendGrid.Email.Test do
   test "put_text/2" do
     text = "Some Text"
     email = Email.put_text(Email.build(), text)
-    assert email.content == [%{ type: "text/plain", value: text }]
+    assert email.content == [%{type: "text/plain", value: text}]
   end
 
   test "put_html/2" do
     html = "<p>Some Text</p>"
     email = Email.put_html(Email.build(), html)
-    assert email.content == [%{ type: "text/html", value: html }]
+    assert email.content == [%{type: "text/html", value: html}]
   end
 
   test "put multiple content types" do
@@ -113,7 +111,7 @@ defmodule SendGrid.Email.Test do
       Email.build()
       |> Email.put_text(text)
       |> Email.put_html(html)
-    assert email.content == [%{ type: "text/plain", value: text }, %{ type: "text/html", value: html }]
+    assert email.content == [%{type: "text/plain", value: text}, %{type: "text/html", value: html}]
   end
 
   test "text content comes before html" do
@@ -123,7 +121,7 @@ defmodule SendGrid.Email.Test do
       Email.build()
       |> Email.put_html(html)
       |> Email.put_text(text)
-    assert email.content == [%{ type: "text/plain", value: text }, %{ type: "text/html", value: html }]
+    assert email.content == [%{type: "text/plain", value: text}, %{type: "text/html", value: html}]
   end
 
   test "add_header/3" do
@@ -141,31 +139,37 @@ defmodule SendGrid.Email.Test do
 
   test "add_substitution/3" do
     email = Email.add_substitution(Email.build(), "-someValue-", "Cool")
-    assert email.substitutions == %{ "-someValue-" => "Cool" }
+    assert email.substitutions == %{"-someValue-" => "Cool"}
   end
 
   test "add_subtitution/3 x2" do
-    email = Email.add_substitution(Email.build(), "-someValue-", "Cool")
+    email = 
+      Email.build()
+      |> Email.add_substitution("-someValue-", "Cool")
       |> Email.add_substitution("-newValue-", "Panda")
-    assert email.substitutions == %{ "-someValue-" => "Cool", "-newValue-" => "Panda" }
+    assert email.substitutions == %{"-someValue-" => "Cool", "-newValue-" => "Panda"}
   end
 
   test "add_custom_arg/3" do
     email = Email.add_custom_arg(Email.build(), "unique_user_id", "abc123")
-    assert email.custom_args == %{ "unique_user_id" => "abc123" }
+    assert email.custom_args == %{"unique_user_id" => "abc123"}
   end
 
   test "add_custom_arg/3 x2" do
-    email = Email.add_custom_arg(Email.build(), "unique_user_id", "abc123")
-            |> Email.add_custom_arg("template_name", "welcome-user")
-    assert email.custom_args == %{ "unique_user_id" => "abc123", "template_name" => "welcome-user" }
+    email = 
+      Email.build()
+      |> Email.add_custom_arg("unique_user_id", "abc123")
+      |> Email.add_custom_arg("template_name", "welcome-user")
+    assert email.custom_args == %{"unique_user_id" => "abc123", "template_name" => "welcome-user"}
   end
 
   test "add_custom_arg/3 does not create duplicate keys" do
-    email = Email.add_custom_arg(Email.build(), "unique_user_id", "abc123")
-            |> Email.add_custom_arg("template_name", "welcome-user")
-            |> Email.add_custom_arg("template_name", "new_template")
-    assert email.custom_args == %{ "unique_user_id" => "abc123", "template_name" => "new_template" }
+    email = 
+      Email.build()
+      |> Email.add_custom_arg("unique_user_id", "abc123")
+      |> Email.add_custom_arg("template_name", "welcome-user")
+      |> Email.add_custom_arg("template_name", "new_template")
+    assert email.custom_args == %{"unique_user_id" => "abc123", "template_name" => "new_template"}
   end
 
   test "put_send_at/2" do
@@ -175,21 +179,20 @@ defmodule SendGrid.Email.Test do
   end
 
   test "email" do
-    :ok = Email.build()
-    |> Email.add_to(@email)
-    |> Email.put_from(@email)
-    |> Email.put_subject("Test")
-    |> Email.put_text("123")
-    |> Email.put_html("<p>123</p>")
-    |> SendGrid.Mailer.send()
+    assert :ok == 
+      Email.build()
+      |> Email.add_to(@email)
+      |> Email.put_from(@email)
+      |> Email.put_subject("Test")
+      |> Email.put_text("123")
+      |> Email.put_html("<p>123</p>")
+      |> SendGrid.Mailer.send()
   end
 
   describe "add_attachemnt/2" do
     test "adds a single attachemnt" do
       attachment = %{content: "somebase64encodedstring", type: "image/jpeg", filename: "testing.jpg"}
-      email =
-        Email.build()
-        |> Email.add_attachment(attachment)
+      email = Email.add_attachment(Email.build(), attachment)
       assert email.attachments == [attachment]
       assert Enum.count(email.attachments) == 1
     end

@@ -70,7 +70,7 @@ email =
 Mailer.send(email)
 ```
 
-### Using a Predefined Template
+### Using a SendGrid Predefined Template
 
 ```elixir
 alias SendGrid.{Mailer, Email}
