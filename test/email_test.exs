@@ -178,16 +178,16 @@ defmodule SendGrid.Email.Test do
     assert email.send_at == time
   end
 
-  test "email" do
-    assert :ok == 
-      Email.build()
-      |> Email.add_to(@email)
-      |> Email.put_from(@email)
-      |> Email.put_subject("Test")
-      |> Email.put_text("123")
-      |> Email.put_html("<p>123</p>")
-      |> SendGrid.Mailer.send()
-  end
+  # test "email" do
+  #   assert :ok == 
+  #     Email.build()
+  #     |> Email.add_to(@email)
+  #     |> Email.put_from(@email)
+  #     |> Email.put_subject("Test")
+  #     |> Email.put_text("123")
+  #     |> Email.put_html("<p>123</p>")
+  #     |> SendGrid.Mailer.send()
+  # end
 
   describe "add_attachemnt/2" do
     test "adds a single attachemnt" do
@@ -206,6 +206,57 @@ defmodule SendGrid.Email.Test do
         |> Email.add_attachment(attachment2)
       assert email.attachments == [attachment1, attachment2]
       assert Enum.count(email.attachments) == 2
+    end
+  end
+
+  defmodule EmailView do
+    use Phoenix.View, root: "test/support/templates", namespace: SendGrid.Email.Test
+  end
+
+  test "put_phoenix_view/2" do
+    result = 
+      Email.build()
+      |> Email.put_phoenix_view(SendGrid.Email.Test.EmailView)
+
+    assert %Email{__phoenix_view__: SendGrid.Email.Test.EmailView} = result
+  end
+
+  describe "put_phoenix_template/2" do
+    test "renders templates with explicit extensions" do
+      # HTML
+      result = 
+        Email.build()
+        |> Email.put_phoenix_view(SendGrid.Email.Test.EmailView)
+        |> Email.put_phoenix_template("test.html", test: "awesome")
+      assert %Email{content: [%{type: "text/html", value: "<p>awesome</p>"}]} = result
+
+      # Text
+      result = 
+        Email.build()
+        |> Email.put_phoenix_view(SendGrid.Email.Test.EmailView)
+        |> Email.put_phoenix_template("test.txt", test: "awesome")
+      assert %Email{content: [%{type: "text/plain", value: "awesome"}]} = result
+    end
+
+    test "renders templates with implicit extensions" do
+      result =
+        Email.build()
+        |> Email.put_phoenix_template("test", test: "awesome")
+      
+      assert %Email{content: [%{type: "text/plain", value: "awesome"}, %{type: "text/html", value: "<p>awesome</p>"}]} = result
+    end
+    
+    test "raises when a template doesn't exist for implicit extensions" do
+      assert_raise Phoenix.Template.UndefinedError, fn ->
+        Email.put_phoenix_template(Email.build(), "test2")
+      end
+    end
+
+    test "renders using the configured phoenix view" do
+      result = 
+        Email.build()
+        |> Email.put_phoenix_template("test.txt", test: "awesome")
+      assert %Email{content: [%{type: "text/plain", value: "awesome"}]} = result
     end
   end
 end

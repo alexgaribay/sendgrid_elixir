@@ -6,9 +6,11 @@ defmodule SendGrid.Mixfile do
      version: "1.4.0",
      elixir: "~> 1.4",
      package: package(),
+     compilers: compilers(Mix.env),
      description: description(),
      source_url: project_url(),
      homepage_url: project_url(),
+     elixirc_paths: elixirc_paths(Mix.env),
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
      deps: deps()]
@@ -22,12 +24,22 @@ defmodule SendGrid.Mixfile do
     ]
   end
 
+  # Use Phoenix compiler depending on environment.
+  defp compilers(:test), do: [:phoenix] ++ Mix.compilers()
+  defp compilers(_), do: Mix.compilers()
+
+  # Specifies which paths to compile per environment.
+  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(_),     do: ["lib"]
+
   defp deps do
     [
-      {:earmark,     "~> 1.2",  only: :dev},
-      {:ex_doc,      "~> 0.16.2", only: :dev},
-      {:httpoison,   "~> 0.11.0"},
-      {:poison,      "~> 3.0"}
+      {:earmark,      "~> 1.2",  only: :dev},
+      {:ex_doc,       "~> 0.16.2", only: :dev},
+      {:httpoison,    "~> 0.11.0"},
+      {:poison,       "~> 3.1", override: true},
+      {:phoenix,      "~> 1.2", only: :test},
+      {:phoenix_html, "~> 2.9", only: :test}
     ]
   end
 

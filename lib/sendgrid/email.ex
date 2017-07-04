@@ -32,7 +32,8 @@ defmodule SendGrid.Email do
             custom_args: nil,
             send_at: nil,
             headers: nil,
-            attachments: nil
+            attachments: nil,
+            __phoenix_view__: nil
 
 
   @type t :: %Email{to: nil | [recipient],
@@ -47,7 +48,8 @@ defmodule SendGrid.Email do
                     custom_args: nil | custom_args,
                     send_at: nil | integer,
                     headers: nil | [header],
-                    attachments: nil | [attachment]}
+                    attachments: nil | [attachment],
+                    __phoenix_view__: nil | atom}
 
   @type recipient :: %{ email: String.t, name: String.t | nil }
   @type content :: %{ type: String.t, value: String.t }
@@ -339,5 +341,105 @@ defmodule SendGrid.Email do
   end
   defp add_address_to_list(list, email, name) when is_list(list) do
      list ++ [address(email, name)]
+  end
+
+  @doc """
+  Sets the Phoenix View to use.
+
+  This will override the default Phoenix View if set in under the `:phoenix_view` 
+  config value.
+
+  ## Examples
+
+      Email.put_phoenix_view(email, MyApp.Web.EmailView)
+  
+  """
+  @spec put_phoenix_view(t, atom) :: t
+  def put_phoenix_view(%Email{} = email, module) when is_atom(module) do
+    %Email{email | __phoenix_view__: module}
+  end
+
+  @doc """
+  Renders the Phoenix template with the given assigns.
+
+  You can set the default Phoenix View to use for your templates by setting the `:phoenix_view` config value. 
+  Additionally, you can set the view on a per email basis by calling `put_phoenix_view/2`.
+
+  ## Explicit Template Extensions
+
+  You can provide a template name with an explicit extension such as `"some_template.html"` or 
+  `"some_template.txt"`. This is set the content of the email respective to the content type of
+  the template rendered. For example, if you render an HTML template, the output of the rendering 
+  will be the HTML content of the email.
+
+  ## Implicit Template Extensions
+
+  You can omit a template's extension and attempt to have both a text template and HTML template 
+  rendered. To have both types rendered, both templates must share the same base file name. For 
+  example, if you have a template named `"some_template.txt"` and a template named `"some_template.html"` 
+  and you call `put_phoenix_template(email, "some_template")`, both templates will be used and will 
+  set the email content for both content types. The only caveat is *both files must exist*, otherwise you'll 
+  have an exception raised.
+
+  ## Examples
+
+      iex> Email.put_phoenix_template(email, "some_template.html") 
+      %Email{content: [%{type: "text/html", value: ...}], ...}
+
+      iex> Email.put_phoenix_template(email, "some_template.txt", name: "John Doe") 
+      %Email{content: [%{type: "text/plain", value: ...}], ...}
+
+      iex> Email.put_phoenix_template(email, "some_template", user: user)
+      %Email{content: [%{type: "text/plain", value: ...}, %{type: "text/html", value: ...}], ...}
+
+  """
+  @spec put_phoenix_template(t, String.t, []) :: t
+  def put_phoenix_template(%Email{} = email, template_name, assigns \\ []) do
+    with true <- ensure_phoenix_loaded(),
+         view_mod <- phoenix_view_module(email) do
+      case Path.extname(template_name) do
+        ".html" ->
+          render_html(email, view_mod, template_name, assigns)
+        ".txt" ->
+          render_text(email, view_mod, template_name, assigns)
+        _ ->
+          email
+          |> render_html(view_mod, template_name <> ".html", assigns)
+          |> render_text(view_mod, template_name <> ".txt", assigns)
+      end
+    end
+  end
+
+  defp render_html(email, view_mod, template_name, assigns) do
+    html = Phoenix.View.render_to_string(view_mod, template_name, assigns) 
+    put_html(email, html)
+  end
+
+  defp render_text(email, view_mod, template_name, assigns) do
+    text = Phoenix.View.render_to_string(view_mod, template_name, assigns)
+    put_text(email, text)
+  end 
+
+  defp ensure_phoenix_loaded do
+    unless Code.ensure_loaded?(Phoenix) do
+      raise ArgumentError, "Attempted to call function that depends on Phoenix. " <>
+                           "Make sure Phoenix is part of your dependencies"
+    end
+    true
+  end
+
+  defp phoenix_view_module(%Email{__phoenix_view__: nil}) do
+    mod = config(:phoenix_view)
+    unless mod do
+      raise ArgumentError, "Phoenix view is expected to be set or configured. " <>
+                           "Ensure your config for :sendgrid includes a value for :phoenix_view or" <>
+                           "explicity set the Phoenix view with `put_phoenix_view/2`."
+    end
+    mod
+  end
+  defp phoenix_view_module(%Email{__phoenix_view__: view_module}), do: view_module
+
+  defp config(key) do
+    Application.get_env(:sendgrid, key)
   end
 end
