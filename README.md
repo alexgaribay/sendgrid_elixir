@@ -6,12 +6,12 @@ Check the [docs](https://hexdocs.pm/sendgrid/) for complete usage.
 ## Example
 
 ```elixir
-  SendGrid.Email.build()
-  |> SendGrid.Email.add_to("test@email.com")
-  |> SendGrid.Email.put_from("test2@email.com")
-  |> SendGrid.Email.put_subject("Hello from Elixir")
-  |> SendGrid.Email.put_text("Sent with Elixir")
-  |> SendGrid.Mailer.send()
+SendGrid.Email.build()
+|> SendGrid.Email.add_to("test@email.com")
+|> SendGrid.Email.put_from("test2@email.com")
+|> SendGrid.Email.put_subject("Hello from Elixir")
+|> SendGrid.Email.put_text("Sent with Elixir")
+|> SendGrid.Mailer.send()
 ```
 
 ## Installation
@@ -39,7 +39,8 @@ config :sendgrid,
   sandbox_enable: true
 ```
 
-Add `:sendgrid` to your list of applications
+Add `:sendgrid` to your list of applications if using Elixir 1.3 or lower.
+
 ```elixir
 defp application do
   [applications: [:sendgrid]]
@@ -80,5 +81,5 @@ You can set a default Phoenix View to use for rendering templates. Just set the 
 
 ```elxir
 config :sendgrid,
-  :phoenix_view: MyApp.Web.EmailView
+  phoenix_view: MyApp.Web.EmailView
 ```
