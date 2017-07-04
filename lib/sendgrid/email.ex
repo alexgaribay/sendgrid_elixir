@@ -2,20 +2,70 @@ defmodule SendGrid.Email do
   @moduledoc """
   Email primitive for composing emails with SendGrid's API.
 
-  ## Examples
+  You can easily compose on an Email to set the fields of your email.
+  
+  ## Example
 
-      iex> Email.build()
-      ...> |> Email.add_to("test@email.com")
-      ...> |> Email.put_from("test2@email.com")
-      ...> |> Email.put_subject("Hello from Elixir")
-      ...> |> Email.put_text("Sent with Elixir")
-      %Email{
-        to: %{ email: "test@email.com" },
-        from %{ email: "test2@email.com" },
-        subject: "Hello from Elixir",
-        content: [%{ type: "text/plain", value: "Sent with Elixir" }],
-        ...
-      }
+      Email.build()
+      |> Email.add_to("test@email.com")
+      |> Email.put_from("test2@email.com")
+      |> Email.put_subject("Hello from Elixir")
+      |> Email.put_text("Sent with Elixir")
+      |> SendGrid.Mailer.send()
+
+  ## SendGrid Specific Features
+
+  Many common features of SendGrid V3 API for transactional emails are supported.
+
+  ### Templates
+
+  You can use a SendGrid template by providing a template id.
+
+      put_template(email, "some_template_id")
+
+  ### Substitutions
+
+  You can provided a key-value pair for subsititions to have text replaced.
+
+      add_substitution(email, "-key-", "value")
+
+  ### Scheduled Sending
+
+  You can provide a Unix timestamp to have an email delivered in the future.
+
+      send_at(email, 1409348513)
+
+  ## Phoenix Views
+
+  You can use Phoenix Views to set your HTML and text content of your emails. You just have 
+  to provide a view module and template name and you're good to go! See `put_phoenix_template/3` 
+  for complete usage.
+
+  ### Examples
+
+      # Using an HTML template
+      %Email{}
+      |> put_phoenix_view(MyApp.Web.EmailView)
+      |> put_phoenix_template("welcome_email.html", user: user)
+
+      # Using a text template
+      %Email{}
+      |> put_phoenix_view(MyApp.Web.EmailView)
+      |> put_phoenix_template("welcome_email.txt", user: user)
+
+      # Using both an HTML and text template
+      # Notice that there is no extension.
+      %Email{}
+      |> put_phoenix_view(MyApp.Web.EmailView)
+      |> put_phoenix_template("welcome_email", user: user)
+
+  ### Using a Default Phoenix View
+
+  You can set a default Phoenix View to use for rendering templates. Just set the `:phoenix_view` 
+  config value
+
+      config :sendgrid,
+        :phoenix_view: MyApp.Web.EmailView
 
   """
 
@@ -51,13 +101,13 @@ defmodule SendGrid.Email do
                     attachments: nil | [attachment],
                     __phoenix_view__: nil | atom}
 
-  @type recipient :: %{ email: String.t, name: String.t | nil }
-  @type content :: %{ type: String.t, value: String.t }
-  @type header :: { String.t, String.t }
+  @type recipient :: %{email: String.t, name: String.t | nil}
+  @type content :: %{type: String.t, value: String.t}
+  @type header :: {String.t, String.t}
   @type attachment :: %{content: String.t, type: String.t, filename: String.t, disposition: String.t, content_id: String.t}
 
-  @type substitutions :: %{ String.t => String.t }
-  @type custom_args :: %{ String.t => String.t }
+  @type substitutions :: %{String.t => String.t}
+  @type custom_args :: %{String.t => String.t}
 
   @doc """
   Builds an an empty email to compose on.
@@ -351,7 +401,7 @@ defmodule SendGrid.Email do
 
   ## Examples
 
-      Email.put_phoenix_view(email, MyApp.Web.EmailView)
+      put_phoenix_view(email, MyApp.Web.EmailView)
   
   """
   @spec put_phoenix_view(t, atom) :: t
@@ -383,13 +433,13 @@ defmodule SendGrid.Email do
 
   ## Examples
 
-      iex> Email.put_phoenix_template(email, "some_template.html") 
+      iex> put_phoenix_template(email, "some_template.html") 
       %Email{content: [%{type: "text/html", value: ...}], ...}
 
-      iex> Email.put_phoenix_template(email, "some_template.txt", name: "John Doe") 
+      iex> put_phoenix_template(email, "some_template.txt", name: "John Doe") 
       %Email{content: [%{type: "text/plain", value: ...}], ...}
 
-      iex> Email.put_phoenix_template(email, "some_template", user: user)
+      iex> put_phoenix_template(email, "some_template", user: user)
       %Email{content: [%{type: "text/plain", value: ...}, %{type: "text/html", value: ...}], ...}
 
   """

@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.5.0 (2017-7-3)
+* Enhancements
+  * update docs
+  * upgrade to Elixir 1.4
+  * add support for Phoenix Views
+
 ## 1.4.0 (2017-2-15)
 * Enhancements
   * update `httpoison` to 0.11.0 and `poison` to 3.0
