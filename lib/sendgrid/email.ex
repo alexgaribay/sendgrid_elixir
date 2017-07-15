@@ -38,7 +38,8 @@ defmodule SendGrid.Email do
   ## Phoenix Views
 
   You can use Phoenix Views to set your HTML and text content of your emails. You just have 
-  to provide a view module and template name and you're good to go! See `put_phoenix_template/3` 
+  to provide a view module and template name and you're good to go! Additionally, you can set 
+  a layout to render the view in with `put_phoenix_layout/2`. See `put_phoenix_template/3` 
   for complete usage.
 
   ### Examples
@@ -54,18 +55,32 @@ defmodule SendGrid.Email do
       |> put_phoenix_template("welcome_email.txt", user: user)
 
       # Using both an HTML and text template
-      # Notice that there is no extension.
       %Email{}
       |> put_phoenix_view(MyApp.Web.EmailView)
-      |> put_phoenix_template("welcome_email", user: user)
+      |> put_phoenix_template(:welcome_email, user: user)
+      
+      # Setting the layout
+      %Email{}
+      |> put_phoenix_layout({MyApp.Web.EmailView, :layout})
+      |> put_phoenix_view(MyApp.Web.EmailView)
+      |> put_phoenix_template(:welcome_email, user: user)
+
 
   ### Using a Default Phoenix View
 
   You can set a default Phoenix View to use for rendering templates. Just set the `:phoenix_view` 
-  config value
+  config value.
 
       config :sendgrid,
-        :phoenix_view: MyApp.Web.EmailView
+        phoenix_view: MyApp.Web.EmailView
+
+
+  ### Using a Default View Layout
+
+  You can set a default layout to render the view in. Just set the `:phoenix_layout` config value.
+
+      config :sendgrid,
+        phoenix_layout: {MyApp.Web.EmailView, :layout}
 
   """
 
@@ -83,7 +98,8 @@ defmodule SendGrid.Email do
             send_at: nil,
             headers: nil,
             attachments: nil,
-            __phoenix_view__: nil
+            __phoenix_view__: nil,
+            __phoenix_layout__: nil
 
 
   @type t :: %Email{to: nil | [recipient],
@@ -99,7 +115,8 @@ defmodule SendGrid.Email do
                     send_at: nil | integer,
                     headers: nil | [header],
                     attachments: nil | [attachment],
-                    __phoenix_view__: nil | atom}
+                    __phoenix_view__: nil | atom,
+                    __phoenix_layout__: nil | %{optional(:text) => String.t, optional(:html) => String.t}}
 
   @type recipient :: %{email: String.t, name: String.t | nil}
   @type content :: %{type: String.t, value: String.t}
@@ -394,6 +411,53 @@ defmodule SendGrid.Email do
   end
 
   @doc """
+  Sets the layout to use for the Phoenix Template.
+
+  Expects a tuple of the view module and layout to use. If you provide an atom as the second element, 
+  the text and HMTL versions of that template will be used for the respective content types.
+
+  Alernatively, you can set a default layout to use by setting the `:phoenix_view` key in your config as 
+  an atom which will be used for both text and HTML emails.
+
+      config :sendgrid,
+        phoenix_layout: {MyApp.Web.EmailView, :layout}
+
+  ## Examples
+
+      put_phoenix_layout(email, {MyApp.Web.EmailView, "layout.html"})
+      put_phoenix_layout(email, {MyApp.Web.EmailView, "layout.txt"})
+      put_phoenix_layout(email, {MyApp.Web.EmailView, :layout})
+
+  """
+  @spec put_phoenix_layout(t, {atom, atom}) :: t
+  def put_phoenix_layout(%Email{} = email, {module, layout}) when is_atom(module) and is_atom(layout) do
+    layouts = build_layouts({module, layout})
+    %Email{email | __phoenix_layout__: layouts}
+  end
+  @spec put_phoenix_layout(t, {atom, String.t}) :: t
+  def put_phoenix_layout(%Email{__phoenix_layout__: layouts} = email, {module, layout}) when is_atom(module) do
+    layouts = layouts || %{}
+    updated_layout = build_layouts({module, layout})
+    %Email{email | __phoenix_layout__: Map.merge(layouts, updated_layout)}
+  end
+
+  # Build layout map
+  defp build_layouts({module, layout}) when is_atom(module) and is_atom(layout) do
+    base_name = Atom.to_string(layout)
+    %{
+      text: {module, base_name <> ".txt"},
+      html: {module, base_name <> ".html"}
+    }
+  end
+  defp build_layouts({module, layout} = args) when is_atom(module) do
+    case Path.extname(layout) do
+      ".html" -> %{html: args}
+      ".txt" -> %{text: args}
+      _ -> raise ArgumentError, "unsupported file type"
+    end 
+  end
+
+  @doc """
   Sets the Phoenix View to use.
 
   This will override the default Phoenix View if set in under the `:phoenix_view` 
@@ -413,7 +477,8 @@ defmodule SendGrid.Email do
   Renders the Phoenix template with the given assigns.
 
   You can set the default Phoenix View to use for your templates by setting the `:phoenix_view` config value. 
-  Additionally, you can set the view on a per email basis by calling `put_phoenix_view/2`.
+  Additionally, you can set the view on a per email basis by calling `put_phoenix_view/2`. Furthermore, you can have 
+  the template rendered inside a layout. See `put_phoenix_layout/2` for more details.
 
   ## Explicit Template Extensions
 
@@ -427,7 +492,7 @@ defmodule SendGrid.Email do
   You can omit a template's extension and attempt to have both a text template and HTML template 
   rendered. To have both types rendered, both templates must share the same base file name. For 
   example, if you have a template named `"some_template.txt"` and a template named `"some_template.html"` 
-  and you call `put_phoenix_template(email, "some_template")`, both templates will be used and will 
+  and you call `put_phoenix_template(email, :some_template)`, both templates will be used and will 
   set the email content for both content types. The only caveat is *both files must exist*, otherwise you'll 
   have an exception raised.
 
@@ -439,33 +504,56 @@ defmodule SendGrid.Email do
       iex> put_phoenix_template(email, "some_template.txt", name: "John Doe") 
       %Email{content: [%{type: "text/plain", value: ...}], ...}
 
-      iex> put_phoenix_template(email, "some_template", user: user)
+      iex> put_phoenix_template(email, :some_template, user: user)
       %Email{content: [%{type: "text/plain", value: ...}, %{type: "text/html", value: ...}], ...}
 
   """
-  @spec put_phoenix_template(t, String.t, []) :: t
-  def put_phoenix_template(%Email{} = email, template_name, assigns \\ []) do
+  def put_phoenix_template(email, template_name, assigns \\ [])
+  @spec put_phoenix_template(t, atom, []) :: t
+  def put_phoenix_template(%Email{} = email, template_name, assigns) when is_atom(template_name) do
     with true <- ensure_phoenix_loaded(),
-         view_mod <- phoenix_view_module(email) do
+         view_mod <- phoenix_view_module(email),
+         layouts <- phoenix_layouts(email),
+         template_name <- Atom.to_string(template_name) do
+      email
+      |> render_html(view_mod, template_name <> ".html", layouts, assigns)
+      |> render_text(view_mod, template_name <> ".txt", layouts, assigns)
+    end
+  end
+  @spec put_phoenix_template(t, String.t, []) :: t
+  def put_phoenix_template(%Email{} = email, template_name, assigns) do
+    with true <- ensure_phoenix_loaded(),
+         view_mod <- phoenix_view_module(email),
+         layouts <- phoenix_layouts(email) do
       case Path.extname(template_name) do
         ".html" ->
-          render_html(email, view_mod, template_name, assigns)
+          render_html(email, view_mod, template_name, layouts, assigns)
         ".txt" ->
-          render_text(email, view_mod, template_name, assigns)
-        _ ->
-          email
-          |> render_html(view_mod, template_name <> ".html", assigns)
-          |> render_text(view_mod, template_name <> ".txt", assigns)
+          render_text(email, view_mod, template_name, layouts, assigns)
       end
     end
   end
 
-  defp render_html(email, view_mod, template_name, assigns) do
+  defp render_html(email, view_mod, template_name, layouts, assigns) do
+    assigns =
+      if Map.has_key?(layouts, :html) do
+        Keyword.put(assigns, :layout, Map.get(layouts, :html))
+      else
+        assigns
+      end
+
     html = Phoenix.View.render_to_string(view_mod, template_name, assigns) 
     put_html(email, html)
   end
 
-  defp render_text(email, view_mod, template_name, assigns) do
+  defp render_text(email, view_mod, template_name, layouts, assigns) do
+    assigns =
+      if Map.has_key?(layouts, :text) do
+        Keyword.put(assigns, :layout, Map.get(layouts, :text))
+      else
+        assigns
+      end
+
     text = Phoenix.View.render_to_string(view_mod, template_name, assigns)
     put_text(email, text)
   end 
@@ -476,6 +564,19 @@ defmodule SendGrid.Email do
                            "Make sure Phoenix is part of your dependencies"
     end
     true
+  end
+
+  defp phoenix_layouts(%Email{__phoenix_layout__: layouts}) do
+    layouts = layouts || %{}
+    case config(:phoenix_layout) do
+      nil -> layouts
+      {module, layout} when is_atom(module) and is_atom(layout) ->
+        configured_layouts = build_layouts({module, layout}) 
+        Map.merge(configured_layouts, layouts)
+      _ ->
+        raise ArgumentError, "Invalid configuration set for :phoenix_layout. " <>
+                             "Ensure the configuration is a tuple of a module and atom ({MyApp.View, :layout})."
+    end
   end
 
   defp phoenix_view_module(%Email{__phoenix_view__: nil}) do

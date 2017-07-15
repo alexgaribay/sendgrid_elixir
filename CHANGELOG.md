@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.6.0 (2017-7-14)
+* Enhancements
+  * Relax dependency versions
+  * add `put_phoenix_layout/2` in `SendGrid.Email` to render views in
+* Breaking Changes
+  * `put_phoenix_template/3` now expects an atom for implicit template rendering
+
 ## 1.5.0 (2017-7-3)
 * Enhancements
   * update docs

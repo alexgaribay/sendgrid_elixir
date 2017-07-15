@@ -1,0 +1,2 @@
+TEXT LAYOUT
+<%= render @view_module, @view_template, assigns %>

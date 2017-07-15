@@ -213,6 +213,50 @@ defmodule SendGrid.Email.Test do
     use Phoenix.View, root: "test/support/templates", namespace: SendGrid.Email.Test
   end
 
+
+  describe "put_phoenix_layout/2" do
+    test "works with html layouts" do
+      result =
+        Email.build()
+        |> Email.put_phoenix_layout({SendGrid.Email.Test.EmailView, "layout.html"})
+      
+        assert result.__phoenix_layout__ == %{html: {SendGrid.Email.Test.EmailView, "layout.html"}}
+    end
+
+    test "works with text layouts" do
+      result =
+        Email.build()
+        |> Email.put_phoenix_layout({SendGrid.Email.Test.EmailView, "layout.txt"})
+      
+        assert result.__phoenix_layout__ == %{text: {SendGrid.Email.Test.EmailView, "layout.txt"}}
+    end
+
+    test "works with setting both a text and an html layout" do
+      result =
+        Email.build()
+        |> Email.put_phoenix_layout({SendGrid.Email.Test.EmailView, "layout.txt"})
+        |> Email.put_phoenix_layout({SendGrid.Email.Test.EmailView, "layout.html"}) 
+      
+      expected = %{
+        html: {SendGrid.Email.Test.EmailView, "layout.html"},
+        text: {SendGrid.Email.Test.EmailView, "layout.txt"} 
+      }
+      assert result.__phoenix_layout__ == expected 
+    end
+
+    test "works with an atom as a layout" do
+      result =
+        Email.build()
+        |> Email.put_phoenix_layout({SendGrid.Email.Test.EmailView, :layout})
+      
+      expected = %{
+        html: {SendGrid.Email.Test.EmailView, "layout.html"},
+        text: {SendGrid.Email.Test.EmailView, "layout.txt"} 
+      }
+      assert result.__phoenix_layout__ == expected 
+    end
+  end
+
   test "put_phoenix_view/2" do
     result = 
       Email.build()
@@ -241,14 +285,14 @@ defmodule SendGrid.Email.Test do
     test "renders templates with implicit extensions" do
       result =
         Email.build()
-        |> Email.put_phoenix_template("test", test: "awesome")
+        |> Email.put_phoenix_template(:test, test: "awesome")
       
       assert %Email{content: [%{type: "text/plain", value: "awesome"}, %{type: "text/html", value: "<p>awesome</p>"}]} = result
     end
     
     test "raises when a template doesn't exist for implicit extensions" do
       assert_raise Phoenix.Template.UndefinedError, fn ->
-        Email.put_phoenix_template(Email.build(), "test2")
+        Email.put_phoenix_template(Email.build(), :test2)
       end
     end
 
@@ -257,6 +301,26 @@ defmodule SendGrid.Email.Test do
         Email.build()
         |> Email.put_phoenix_template("test.txt", test: "awesome")
       assert %Email{content: [%{type: "text/plain", value: "awesome"}]} = result
+    end
+
+    test "renders in a text layout" do
+      result =
+        Email.build()
+        |> Email.put_phoenix_layout({SendGrid.Email.Test.EmailView, :layout})
+        |> Email.put_phoenix_template("test.txt", test: "awesome")
+      
+      assert Enum.at(result.content, 0).value =~ "TEXT LAYOUT"
+      assert Enum.at(result.content, 0).value =~ "awesome"
+    end
+    
+    test "renders in an html layout" do
+      result =
+        Email.build()
+        |> Email.put_phoenix_layout({SendGrid.Email.Test.EmailView, :layout})
+        |> Email.put_phoenix_template("test.html", test: "awesome")
+      
+      assert Enum.at(result.content, 0).value =~ "HTML LAYOUT"
+      assert Enum.at(result.content, 0).value =~ "awesome"
     end
   end
 end

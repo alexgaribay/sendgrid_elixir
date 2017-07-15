@@ -19,7 +19,7 @@ SendGrid.Email.build()
 Add the following code to your dependencies in your **`mix.exs`** file:
 
 ```elixir
-{:sendgrid, "~> 1.5.0"}
+{:sendgrid, "~> 1.6.0"}
 ```
 
 ## Configuration
@@ -47,11 +47,12 @@ defp application do
 end
 ```
 
-
 ## Phoenix Views
 
 You can use Phoenix Views to set your HTML and text content of your emails. You just have 
-to provide a view module and template name and you're good to go! See `SendGrid.Email.put_phoenix_template/3` for complete usage.
+to provide a view module and template name and you're good to go! Additionally, you can set 
+a layout to render the view in with `SendGrid.Email.put_phoenix_layout/2`. See `SendGrid.Email.put_phoenix_template/3` 
+for complete usage.
 
 ### Examples
 
@@ -69,17 +70,32 @@ import SendGrid.Email
 |> put_phoenix_template("welcome_email.txt", user: user)
 
 # Using both an HTML and text template
-# Notice that there is no extension.
 %SendGrid.Email{}
 |> put_phoenix_view(MyApp.Web.EmailView)
-|> put_phoenix_template("welcome_email", user: user)
+|> put_phoenix_template(:welcome_email, user: user)
+
+
+# Setting the layout
+%SendGrid.Email{}
+|> put_phoenix_layout({MyApp.Web.EmailView, :layout})
+|> put_phoenix_view(MyApp.Web.EmailView)
+|> put_phoenix_template(:welcome_email, user: user)
 ```
 
 ### Using a Default Phoenix View
 
 You can set a default Phoenix View to use for rendering templates. Just set the `:phoenix_view` config value
 
-```elxir
+```elixir
 config :sendgrid,
   phoenix_view: MyApp.Web.EmailView
+```
+
+### Using a Default Layout
+
+You can set a default layout to render your view in. Set the `:phoenix_layout` config value.
+
+```elixir
+config :sendgrid,
+  phoenix_layout: {MyApp.Web.EmailView, :layout}
 ```
