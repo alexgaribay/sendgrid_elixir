@@ -64,7 +64,7 @@ defmodule SendGrid.Contacts.Lists do
   @doc """
   Deletes a recipient from an email list.
 
-      :ok = remove_recipient(123, "recipient_id")
+      :ok = delete_recipient(123, "recipient_id")
   """
   @spec delete_recipient(integer, String.t) :: :ok | :error
   def delete_recipient(list_id, recipient_id) do
