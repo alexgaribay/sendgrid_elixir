@@ -13,7 +13,9 @@ defmodule SendGrid.Mixfile do
      elixirc_paths: elixirc_paths(Mix.env),
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
-     deps: deps()]
+     deps: deps(),
+     xref: [exclude: [Phoenix.View]]
+    ]
   end
 
   def application do
@@ -40,7 +42,7 @@ defmodule SendGrid.Mixfile do
       {:poison,       ">= 2.0.0 or >= 3.0.0"},
       {:phoenix,      "~> 1.2", only: :test},
       {:phoenix_html, "~> 2.9", only: :test}
-  ]
+    ]
   end
 
   defp description do
