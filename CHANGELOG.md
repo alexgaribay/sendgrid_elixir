@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.7.0 (2017-9-11)
+* Enhancements
+  * Add `add/1`, `all_recipients/3`, and `delete_recipient/2` to `SendGrid.Contacts.Lists`
+  * Remove compile warnings for `Phoenix.View`
+
 ## 1.6.0 (2017-7-14)
 * Enhancements
   * Relax dependency versions
