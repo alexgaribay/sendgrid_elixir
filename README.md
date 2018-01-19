@@ -19,7 +19,7 @@ SendGrid.Email.build()
 Add the following code to your dependencies in your **`mix.exs`** file:
 
 ```elixir
-{:sendgrid, "~> 1.7.0"}
+{:sendgrid, "~> 1.8.0"}
 ```
 
 ## Configuration
