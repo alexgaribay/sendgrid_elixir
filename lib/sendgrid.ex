@@ -25,7 +25,18 @@ defmodule SendGrid do
   end
 
   defp api_key() do
-    Application.get_env(:sendgrid, :api_key)
+    api_key = Application.get_env(:sendgrid, :api_key)
+
+    unless api_key do
+      raise RuntimeError, """
+      No API key is configured for SendGrid. Update your config before making an API call.
+
+          config :sendgrid,
+            api_key: "sengrid_api_key"
+      """
+    end
+
+    api_key
   end
 
   # Default headers to be sent.
