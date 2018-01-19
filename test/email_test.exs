@@ -178,17 +178,6 @@ defmodule SendGrid.Email.Test do
     assert email.send_at == time
   end
 
-  # test "email" do
-  #   assert :ok == 
-  #     Email.build()
-  #     |> Email.add_to(@email)
-  #     |> Email.put_from(@email)
-  #     |> Email.put_subject("Test")
-  #     |> Email.put_text("123")
-  #     |> Email.put_html("<p>123</p>")
-  #     |> SendGrid.Mailer.send()
-  # end
-
   describe "add_attachemnt/2" do
     test "adds a single attachemnt" do
       attachment = %{content: "somebase64encodedstring", type: "image/jpeg", filename: "testing.jpg"}
