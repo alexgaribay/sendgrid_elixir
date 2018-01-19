@@ -3,7 +3,7 @@ defmodule SendGrid.Mixfile do
 
   def project do
     [app: :sendgrid,
-     version: "1.7.0",
+     version: "1.8.0",
      elixir: "~> 1.4",
      package: package(),
      compilers: compilers(Mix.env),

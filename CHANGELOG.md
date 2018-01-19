@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.8.0 (2018-1-18)
+* Enhancements
+  * Raise runtime error whenever API isn't configured whenever making an API call
+* Fixes
+  * custom headers are properly sent when V3 of the SendGrid API
+
 ## 1.7.0 (2017-9-11)
 * Enhancements
   * Add `add/1`, `all_recipients/3`, and `delete_recipient/2` to `SendGrid.Contacts.Lists`
@@ -27,7 +33,7 @@
 * Enhancements
   * add `add_custom_arg` for custom arguments
   * remove `raise` when no API key is provided at compile-time
-  
+
 ## 1.2.0 (2016-9-28)
 * Enhancements
   * add `add_attachment` for attachments
@@ -54,7 +60,7 @@
 ## 1.0.1 (2016-7-16)
 
 * Fixes
-  * [Email] Make an exposed method private 
+  * [Email] Make an exposed method private
 
 ## 1.0.0 (2016-7-15)
 
@@ -62,10 +68,10 @@
   * [Email] multiple TO recipients can be added with `add_to/2` and `add_to/3`
   * [Email] BCC recipients can be supported
   * [Email] Reply-to name can be specified as third param of `put_reply_to/3`
-  * [Email] added `put_send_at/2` for delayed sending of email 
+  * [Email] added `put_send_at/2` for delayed sending of email
   * [Mailer] uses V3 of the SendGrid mail send API
   * [Mailer] sandbox mode can be enabled through a config setting
-    
+
 * Breaking Changes
   * `put_to/2` no longer exists; use `add_to/2` or `add_to/3` instead
   * `add_cc/2` when submitting a list of addresses no longer exists
@@ -76,7 +82,7 @@
 
 * Enhancements
   * Updated HTTPoison version for less compiler warnings when using Elixir 1.3
-  
+
 ## 0.1.0 (2016-5-22)
 
 * Enhancements
@@ -96,5 +102,3 @@ end
 
 * Fixes
   * Updated some docs
-
-
