@@ -25,7 +25,7 @@ defmodule SendGrid.Contacts.Lists do
       {:ok, 2} = add("marketing")
 
   """
-  @spec add(String.t) :: {:ok, integer} | :error
+  @spec add(String.t()) :: {:ok, integer} | :error
   def add(list_name) do
     case SendGrid.post(@base_api_url, %{name: list_name}) do
       {:ok, %{status_code: 201, body: body}} -> {:ok, body["id"]}
@@ -39,6 +39,7 @@ defmodule SendGrid.Contacts.Lists do
   @spec all_recipients(integer, integer, integer) :: list(%{}) | :error
   def all_recipients(list_id, page \\ 1, page_size \\ 100) do
     url = @base_api_url <> "/#{list_id}/recipients?page_size=#{page_size}&page=#{page}"
+
     case SendGrid.get(url) do
       {:ok, %{status_code: 200, body: body}} -> body["recipients"]
       _ -> :error
@@ -49,11 +50,12 @@ defmodule SendGrid.Contacts.Lists do
   Adds a recipient to an email list.
 
       :ok = add_recipient(123, "recipient_id")
-  
+
   """
-  @spec add_recipient(integer, String.t) :: :ok | :error
+  @spec add_recipient(integer, String.t()) :: :ok | :error
   def add_recipient(list_id, recipient_id) do
     url = @base_api_url <> "/#{list_id}/recipients/#{recipient_id}"
+
     case SendGrid.post(url, %{}) do
       {:ok, %{status_code: 201}} -> :ok
       _ -> :error
@@ -66,9 +68,10 @@ defmodule SendGrid.Contacts.Lists do
       :ok = delete_recipient(123, "recipient_id")
 
   """
-  @spec delete_recipient(integer, String.t) :: :ok | :error
+  @spec delete_recipient(integer, String.t()) :: :ok | :error
   def delete_recipient(list_id, recipient_id) do
     url = @base_api_url <> "/#{list_id}/recipients/#{recipient_id}"
+
     case SendGrid.delete(url, %{}) do
       {:ok, %{status_code: 204}} -> :ok
       _ -> :error

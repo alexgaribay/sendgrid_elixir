@@ -1,7 +1,7 @@
 defmodule SendGrid do
   @moduledoc """
   Interface to SendGrid's API.
-  
+
   ## Configuration
 
   A configuration key is expected with a working SendGrid API key.
@@ -11,9 +11,9 @@ defmodule SendGrid do
 
   ## Usage
 
-  Most usage with this library will be with composing transactional emails. Refer to `SendGrid.Email` for full 
+  Most usage with this library will be with composing transactional emails. Refer to `SendGrid.Email` for full
   documentation and usage.
-  
+
   """
 
   use HTTPoison.Base
@@ -41,10 +41,10 @@ defmodule SendGrid do
 
   # Default headers to be sent.
   defp base_headers() do
-     %{
-       "Content-Type" => "application/json",
-       "Authorization" => "Bearer #{api_key()}"
-     }
+    %{
+      "Content-Type" => "application/json",
+      "Authorization" => "Bearer #{api_key()}"
+    }
   end
 
   defp process_request_body(body) when is_binary(body), do: body
@@ -52,19 +52,17 @@ defmodule SendGrid do
 
   # Override the base headers with any passed in.
   defp process_request_headers(request_headers) do
-    headers =
-      request_headers
-      |> Enum.into(%{})
+    headers = Enum.into(request_headers, %{})
 
-    Map.merge(base_headers(), headers)
+    base_headers()
+    |> Map.merge(headers)
     |> Enum.into([])
   end
 
   defp process_response_body(body) do
     case Poison.decode(body) do
-      { :ok, data } -> data
+      {:ok, data} -> data
       _ -> body
     end
   end
-
 end
