@@ -31,6 +31,13 @@ config :sendgrid,
   api_key: "SENDGRID_API_KEY"
 ```
 
+If you want to use environment variable, use `{:system, "ENV_NAME"}` in your config:
+
+```elixir
+config :sendgrid,
+  api_key: {:system, "SENDGRID_API_KEY"}
+```
+
 If you'd like to enable sandbox mode (emails won't send but will be validated), add the setting to your config:
 
 ```elixir
