@@ -35,7 +35,6 @@ defmodule SendGrid.Mailer do
   @spec send(SendGrid.Email.t()) :: :ok | {:error, [String.t()]} | {:error, String.t()}
   def send(%Email{} = email) do
     payload = format_payload(email)
-    IO.inspect(payload)
 
     case SendGrid.post(@mail_url, payload, [{"Content-Type", "application/json"}]) do
       {:ok, %{status_code: status_code}} when status_code in [200, 202] -> :ok
@@ -69,6 +68,7 @@ defmodule SendGrid.Mailer do
       |> Enum.map(&to_payload/1)
       |> Enum.concat([email_personalizations])
       |> Enum.reject(fn p -> p == %{} end)
+      |> Enum.reverse()
 
     headers =
       headers

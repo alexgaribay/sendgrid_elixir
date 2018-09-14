@@ -18,6 +18,21 @@ defmodule SendGrid.MailerTest do
   end
 
   @tag integration: true
+  test "send error handling" do
+    assert {:error, error} =
+             Email.build()
+             |> Email.add_to("invalid")
+             |> Email.put_from(Application.get_env(:sendgrid, :test_address))
+             |> Email.put_subject("Test")
+             |> Email.put_text("123")
+             |> Email.put_html("<p>123</p>")
+             |> Email.add_header("TEST", "FOO")
+             |> SendGrid.Mailer.send()
+
+    refute error == []
+  end
+
+  @tag integration: true
   test "send personalizations" do
     personalization =
       Personalization.build()
@@ -59,6 +74,31 @@ defmodule SendGrid.MailerTest do
       |> SendGrid.Mailer.send()
 
     assert :ok == result
+  end
+
+  @tag integration: true
+  test "send multiple personalizations error handling" do
+    personalization1 =
+      Personalization.build()
+      |> Personalization.add_to(Application.get_env(:sendgrid, :test_address))
+      |> Personalization.put_subject("Test1")
+      |> Personalization.add_header("TEST1", "FOO")
+
+    personalization2 =
+      Personalization.build()
+      |> Personalization.add_to("invalid")
+      |> Personalization.put_subject("Test2")
+
+    assert {:error, error} =
+             Email.build()
+             |> Email.put_from(Application.get_env(:sendgrid, :test_address))
+             |> Email.put_text("123")
+             |> Email.put_html("<p>123</p>")
+             |> Email.add_personalization(personalization1)
+             |> Email.add_personalization(personalization2)
+             |> SendGrid.Mailer.send()
+
+    refute error == []
   end
 
   describe "format_payload" do
