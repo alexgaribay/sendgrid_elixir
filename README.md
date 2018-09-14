@@ -113,7 +113,7 @@ Personalizations allow you to define:
 - `custom_args` - Any custom arguments you would like to include in your email.
 - `send_at` - A specific time that you would like your email to be sent.
 
-## Example
+### Example
 
 ```elixir
 alias SendGrid.{Email, Personalization}

@@ -46,6 +46,7 @@ defmodule SendGrid.Mailer do
   @doc false
   def format_payload(%Email{} = email) do
     %Email{
+      to: to,
       from: from,
       subject: subject,
       content: content,
@@ -57,23 +58,27 @@ defmodule SendGrid.Mailer do
       personalizations: personalizations
     } = email
 
-    email_personalizations =
-      email
-      |> Map.take(~w(to cc bcc substitutions custom_args)a)
-      |> Stream.filter(fn {_key, v} -> v != nil && v != [] end)
-      |> Enum.into(%{})
-
     personalizations =
       personalizations
       |> Enum.map(&to_payload/1)
-      |> Enum.concat([email_personalizations])
       |> Enum.reject(fn p -> p == %{} end)
       |> Enum.reverse()
 
-    headers =
-      headers
-      |> List.wrap()
-      |> Enum.into(%{})
+    personalizations =
+      case to do
+        nil ->
+          personalizations
+
+        _to ->
+          email_personalization =
+            email
+            |> Map.take(~w(to cc bcc substitutions custom_args)a)
+            |> sanitize_personalization()
+
+          [email_personalization | personalizations]
+      end
+
+    headers = headers_to_payload(headers)
 
     %{
       personalizations: personalizations,
@@ -93,21 +98,30 @@ defmodule SendGrid.Mailer do
     payload =
       personalization
       |> Map.from_struct()
-      |> Stream.filter(fn {_key, v} -> v != nil && v != [] end)
-      |> Enum.into(%{})
+      |> Map.take(~w(to cc bcc subject substitutions custom_args send_at headers)a)
+      |> sanitize_personalization()
 
     case Map.get(payload, :headers) do
       nil ->
         payload
 
       headers ->
-        headers =
-          headers
-          |> List.wrap()
-          |> Enum.into(%{})
+        headers = headers_to_payload(headers)
 
         Map.put(payload, :headers, headers)
     end
+  end
+
+  defp sanitize_personalization(attrs) do
+    attrs
+    |> Stream.filter(fn {_key, v} -> v != nil && v != [] end)
+    |> Enum.into(%{})
+  end
+
+  defp headers_to_payload(headers) do
+    headers
+    |> List.wrap()
+    |> Enum.into(%{})
   end
 
   defp sandbox_mode(), do: Application.get_env(:sendgrid, :sandbox_enable) || false
