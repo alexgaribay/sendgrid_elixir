@@ -14,7 +14,7 @@ defmodule SendGrid.Mailer do
 
   """
 
-  alias SendGrid.Email
+  alias SendGrid.{Email, Personalization}
 
   @mail_url "/v3/mail/send"
 
@@ -35,6 +35,7 @@ defmodule SendGrid.Mailer do
   @spec send(SendGrid.Email.t()) :: :ok | {:error, [String.t()]} | {:error, String.t()}
   def send(%Email{} = email) do
     payload = format_payload(email)
+    IO.inspect(payload)
 
     case SendGrid.post(@mail_url, payload, [{"Content-Type", "application/json"}]) do
       {:ok, %{status_code: status_code}} when status_code in [200, 202] -> :ok
@@ -45,29 +46,68 @@ defmodule SendGrid.Mailer do
 
   @doc false
   def format_payload(%Email{} = email) do
-    personalizations =
+    %Email{
+      from: from,
+      subject: subject,
+      content: content,
+      reply_to: reply_to,
+      send_at: send_at,
+      template_id: template_id,
+      headers: headers,
+      attachments: attachments,
+      personalizations: personalizations
+    } = email
+
+    email_personalizations =
       email
       |> Map.take(~w(to cc bcc substitutions custom_args)a)
       |> Stream.filter(fn {_key, v} -> v != nil && v != [] end)
       |> Enum.into(%{})
 
+    personalizations =
+      personalizations
+      |> Enum.map(&to_payload/1)
+      |> Enum.concat([email_personalizations])
+      |> Enum.reject(fn p -> p == %{} end)
+
     headers =
-      email.headers
+      headers
       |> List.wrap()
       |> Enum.into(%{})
 
     %{
-      personalizations: [personalizations],
-      from: email.from,
-      subject: email.subject,
-      content: email.content,
-      reply_to: email.reply_to,
-      send_at: email.send_at,
-      template_id: email.template_id,
-      attachments: email.attachments,
+      personalizations: personalizations,
+      from: from,
+      subject: subject,
+      content: content,
+      reply_to: reply_to,
+      send_at: send_at,
+      template_id: template_id,
+      attachments: attachments,
       headers: headers,
       mail_settings: %{sandbox_mode: %{enable: sandbox_mode()}}
     }
+  end
+
+  defp to_payload(%Personalization{} = personalization) do
+    payload =
+      personalization
+      |> Map.from_struct()
+      |> Stream.filter(fn {_key, v} -> v != nil && v != [] end)
+      |> Enum.into(%{})
+
+    case Map.get(payload, :headers) do
+      nil ->
+        payload
+
+      headers ->
+        headers =
+          headers
+          |> List.wrap()
+          |> Enum.into(%{})
+
+        Map.put(payload, :headers, headers)
+    end
   end
 
   defp sandbox_mode(), do: Application.get_env(:sendgrid, :sandbox_enable) || false

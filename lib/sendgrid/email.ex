@@ -84,7 +84,7 @@ defmodule SendGrid.Email do
 
   """
 
-  alias __MODULE__
+  alias SendGrid.{Email, Personalization}
 
   defstruct to: nil,
             cc: nil,
@@ -99,6 +99,7 @@ defmodule SendGrid.Email do
             send_at: nil,
             headers: nil,
             attachments: nil,
+            personalizations: [],
             __phoenix_view__: nil,
             __phoenix_layout__: nil
 
@@ -116,6 +117,7 @@ defmodule SendGrid.Email do
           send_at: nil | integer,
           headers: nil | [header],
           attachments: nil | [attachment],
+          personalizations: [SendGrid.Personalization.t()],
           __phoenix_view__: nil | atom,
           __phoenix_layout__:
             nil | %{optional(:text) => String.t(), optional(:html) => String.t()}
@@ -229,6 +231,42 @@ defmodule SendGrid.Email do
   def add_bcc(%Email{bcc: bcc} = email, bcc_address, bcc_name) do
     addresses = add_address_to_list(bcc, bcc_address, bcc_name)
     %Email{email | bcc: addresses}
+  end
+
+  @doc """
+  Adds a personalization to the email.
+
+  Personalizations are used to identify who should receive the email as well as
+  specifics about how you would like the email to be handled.
+
+  Personalizations allow you to define:
+
+    - `to`, `cc`, `bcc` - The recipients of your email.
+    - `subject` - The subject of your email.
+    - `headers` - Any headers you would like to include in your email.
+    - `substitutions` - Any substitutions you would like to be made for your email.
+    - `custom_args` - Any custom arguments you would like to include in your email.
+    - `send_at` - A specific time that you would like your email to be sent.
+
+  ## Example
+
+      alias SendGrid.{Email, Personalization}
+
+      personalization =
+        Personalization.build()
+        |> Personalization.add_to("recipient1@example.com")
+        |> Personalization.add_cc("recipient2@example.com")
+
+      Email.build()
+      |> Email.add_from("sender@example.com")
+      |> Email.add_personalization(personalization)
+      |> SendGrid.Mailer.send()
+
+  """
+  def add_personalization(%Email{} = email, %Personalization{} = p) do
+    %Email{personalizations: personalizations} = email
+
+    %Email{email | personalizations: [p | personalizations]}
   end
 
   @doc """
@@ -531,7 +569,8 @@ defmodule SendGrid.Email do
   """
   def put_phoenix_template(email, template_name, assigns \\ [])
   @spec put_phoenix_template(t, atom, []) :: t
-  def put_phoenix_template(%Email{} = email, template_name, assigns) when is_atom(template_name) do
+  def put_phoenix_template(%Email{} = email, template_name, assigns)
+      when is_atom(template_name) do
     with true <- ensure_phoenix_loaded(),
          view_mod <- phoenix_view_module(email),
          layouts <- phoenix_layouts(email),
