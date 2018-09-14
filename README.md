@@ -100,6 +100,41 @@ config :sendgrid,
   phoenix_layout: {MyApp.Web.EmailView, :layout}
 ```
 
+## Personalizations
+
+Personalizations are used to identify who should receive the email as well as specifics about how you would like the email to be handled.
+
+Personalizations allow you to define:
+
+- `to`, `cc`, `bcc` - The recipients of your email.
+- `subject` - The subject of your email.
+- `headers` - Any headers you would like to include in your email.
+- `substitutions` - Any substitutions you would like to be made for your email.
+- `custom_args` - Any custom arguments you would like to include in your email.
+- `send_at` - A specific time that you would like your email to be sent.
+
+## Example
+
+```elixir
+alias SendGrid.{Email, Personalization}
+
+personalization =
+  Personalization.build()
+  |> Personalization.add_to("recipient1@example.com")
+  |> Personalization.add_cc("recipient2@example.com")
+
+Email.build()
+|> Email.add_from("sender@example.com")
+|> Email.add_personalization(personalization)
+|> SendGrid.Mailer.send()
+```
+
+Multiple personalizations may be added to an email allowing you to specify different handling instructions for different copies of your email. For example, you could send the same email to both <john@example.com> and <janeexampexample@example.com>, but set each email to be delivered at different times.
+
+### Limitations
+
+The SendGrid v3 API limits you to 1,000 personalizations per API request. If you need to include more than 1,000 personalizations, please divide these across multiple API requests.
+
 ## Testing
 
 To run the unit tests you will need to create a `config/config.exs` file and provide your own SendGrid API and email address to receive a test email.
