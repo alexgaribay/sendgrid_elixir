@@ -49,9 +49,9 @@ end
 
 ## Phoenix Views
 
-You can use Phoenix Views to set your HTML and text content of your emails. You just have 
-to provide a view module and template name and you're good to go! Additionally, you can set 
-a layout to render the view in with `SendGrid.Email.put_phoenix_layout/2`. See `SendGrid.Email.put_phoenix_template/3` 
+You can use Phoenix Views to set your HTML and text content of your emails. You just have
+to provide a view module and template name and you're good to go! Additionally, you can set
+a layout to render the view in with `SendGrid.Email.put_phoenix_layout/2`. See `SendGrid.Email.put_phoenix_template/3`
 for complete usage.
 
 ### Examples
@@ -98,4 +98,25 @@ You can set a default layout to render your view in. Set the `:phoenix_layout` c
 ```elixir
 config :sendgrid,
   phoenix_layout: {MyApp.Web.EmailView, :layout}
+```
+
+## Testing
+
+To run the unit tests you will need to create a `config/config.exs` file and provide your own SendGrid API and email address to receive a test email.
+
+```elixir
+use Mix.Config
+
+config :sendgrid,
+  api_key: "<API_KEY>",
+  phoenix_view: SendGrid.Email.Test.EmailView,
+  test_address: "recipient@example.com"
+```
+
+The `config` directory is excluded from the git repository so your API key and email address will not be committed.
+
+Once configured you can run the full test suite including integration tests as follows:
+
+```console
+mix test --include integration
 ```

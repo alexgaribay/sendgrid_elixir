@@ -19,7 +19,19 @@ defmodule SendGrid.MailerTest do
 
   describe "format_payload" do
     test "removes nil/emply personalizations" do
-      assert Mailer.format_payload(Email.build()) == [%{}]
+      assert Mailer.format_payload(Email.build()) ==
+               %{
+                 attachments: nil,
+                 content: nil,
+                 from: nil,
+                 headers: %{},
+                 mail_settings: %{sandbox_mode: %{enable: false}},
+                 personalizations: [%{}],
+                 reply_to: nil,
+                 send_at: nil,
+                 subject: nil,
+                 template_id: nil
+               }
     end
 
     test "includes custom header" do
