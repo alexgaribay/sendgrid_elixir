@@ -36,7 +36,7 @@ defmodule SendGrid do
       No API key is configured for SendGrid. Update your config before making an API call.
 
           config :sendgrid,
-            api_key: "sengrid_api_key"
+            api_key: "sendgrid_api_key"
       """
     end
 
