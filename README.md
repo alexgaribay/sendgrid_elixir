@@ -65,7 +65,7 @@ import SendGrid.Email
 |> put_phoenix_template("welcome_email.html", user: user)
 
 # Using a text template
-%SendGridEmail{}
+%SendGrid.Email{}
 |> put_phoenix_view(MyApp.Web.EmailView)
 |> put_phoenix_template("welcome_email.txt", user: user)
 
