@@ -25,7 +25,11 @@ defmodule SendGrid do
   end
 
   defp api_key() do
-    api_key = Application.get_env(:sendgrid, :api_key)
+    api_key =
+      case Application.get_env(:sendgrid, :api_key) do
+        {:system, env_name} -> System.get_env(env_name)
+        key -> key
+      end
 
     unless api_key do
       raise RuntimeError, """
