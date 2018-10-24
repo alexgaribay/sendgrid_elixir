@@ -409,7 +409,7 @@ defmodule SendGrid.Email do
 
   """
   @spec dynamic_template_data(t, String.t(), String.t()) :: t
-  def dynamic_template_data(%Email{dynamic_template_data: dynamic_template_data} = email, arg_name, arg_value) do
+  def add_dynamic_template_data(%Email{dynamic_template_data: dynamic_template_data} = email, arg_name, arg_value) do
     dynamic_template_data = Map.put(dynamic_template_data || %{}, arg_name, arg_value)
     %Email{email | dynamic_template_data: dynamic_template_data}
   end
