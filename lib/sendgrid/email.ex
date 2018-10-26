@@ -121,15 +121,15 @@ defmodule SendGrid.Email do
             nil | %{optional(:text) => String.t(), optional(:html) => String.t()}
         }
 
-  @type recipient :: %{email: String.t(), name: String.t() | nil}
+  @type recipient :: %{required(:email) => String.t(), name: String.t() | nil}
   @type content :: %{type: String.t(), value: String.t()}
   @type header :: {String.t(), String.t()}
   @type attachment :: %{
-          content: String.t(),
-          type: String.t(),
-          filename: String.t(),
-          disposition: String.t(),
-          content_id: String.t()
+          required(:content) => String.t(),
+          optional(:type) => String.t(),
+          required(:filename) => String.t(),
+          optional(:disposition) => String.t(),
+          optional(:content_id) => String.t()
         }
 
   @type substitutions :: %{String.t() => String.t()}
