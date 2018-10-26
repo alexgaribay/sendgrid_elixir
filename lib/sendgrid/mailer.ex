@@ -47,7 +47,7 @@ defmodule SendGrid.Mailer do
   def format_payload(%Email{} = email) do
     personalizations =
       email
-      |> Map.take(~w(to cc bcc substitutions custom_args, dynamic_template_data)a)
+      |> Map.take(~w(to cc bcc substitutions custom_args dynamic_template_data)a)
       |> Stream.filter(fn {_key, v} -> v != nil && v != [] end)
       |> Enum.into(%{})
 
