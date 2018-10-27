@@ -99,6 +99,7 @@ defmodule SendGrid.Email do
             send_at: nil,
             headers: nil,
             attachments: nil,
+            dynamic_template_data: nil,
             __phoenix_view__: nil,
             __phoenix_layout__: nil
 
@@ -113,6 +114,7 @@ defmodule SendGrid.Email do
           template_id: nil | String.t(),
           substitutions: nil | substitutions,
           custom_args: nil | custom_args,
+          dynamic_template_data: nil | dynamic_template_data,
           send_at: nil | integer,
           headers: nil | [header],
           attachments: nil | [attachment],
@@ -134,6 +136,7 @@ defmodule SendGrid.Email do
 
   @type substitutions :: %{String.t() => String.t()}
   @type custom_args :: %{String.t() => String.t()}
+  @type dynamic_template_data :: %{String.t() => String.t()}
 
   @doc """
   Builds an an empty email to compose on.
@@ -392,6 +395,23 @@ defmodule SendGrid.Email do
   def add_custom_arg(%Email{custom_args: custom_args} = email, arg_name, arg_value) do
     custom_args = Map.put(custom_args || %{}, arg_name, arg_value)
     %Email{email | custom_args: custom_args}
+  end
+
+  @doc """
+  Adds a custom_arg value to the email.
+
+  If an argument for a given name is already set, it will be replaced when adding
+  a argument with the same name.
+
+  ## Examples
+
+      Email.dynamic_template_data(%Email{}, "-sentIn-", "Elixir")
+
+  """
+  @spec add_dynamic_template_data(t, String.t(), String.t()) :: t
+  def add_dynamic_template_data(%Email{dynamic_template_data: dynamic_template_data} = email, arg_name, arg_value) do
+    dynamic_template_data = Map.put(dynamic_template_data || %{}, arg_name, arg_value)
+    %Email{email | dynamic_template_data: dynamic_template_data}
   end
 
   @doc """
