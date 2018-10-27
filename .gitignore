@@ -1,4 +1,3 @@
-config/
 .idea/
 sendgridelixir.iml
 /_build
@@ -7,3 +6,4 @@ sendgridelixir.iml
 erl_crash.dump
 *.ez
 /doc
+.DS_Store

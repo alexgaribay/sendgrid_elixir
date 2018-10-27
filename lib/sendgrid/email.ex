@@ -11,7 +11,7 @@ defmodule SendGrid.Email do
       |> Email.put_from("test2@email.com")
       |> Email.put_subject("Hello from Elixir")
       |> Email.put_text("Sent with Elixir")
-      |> SendGrid.Mailer.send()
+      |> SendGrid.Mail.send()
 
   ## SendGrid Specific Features
 
@@ -84,7 +84,7 @@ defmodule SendGrid.Email do
 
   """
 
-  alias __MODULE__
+  alias SendGrid.Email
 
   defstruct to: nil,
             cc: nil,
@@ -100,6 +100,7 @@ defmodule SendGrid.Email do
             headers: nil,
             attachments: nil,
             dynamic_template_data: nil,
+            sandbox: false,
             __phoenix_view__: nil,
             __phoenix_layout__: nil
 
@@ -118,12 +119,13 @@ defmodule SendGrid.Email do
           send_at: nil | integer,
           headers: nil | [header],
           attachments: nil | [attachment],
+          sandbox: boolean(),
           __phoenix_view__: nil | atom,
           __phoenix_layout__:
             nil | %{optional(:text) => String.t(), optional(:html) => String.t()}
         }
 
-  @type recipient :: %{required(:email) => String.t(), name: String.t() | nil}
+  @type recipient :: %{required(:email) => String.t(), optional(:name) => String.t()}
   @type content :: %{type: String.t(), value: String.t()}
   @type header :: {String.t(), String.t()}
   @type attachment :: %{
@@ -405,11 +407,15 @@ defmodule SendGrid.Email do
 
   ## Examples
 
-      Email.dynamic_template_data(%Email{}, "-sentIn-", "Elixir")
+      Email.add_dynamic_template_data(%Email{}, "-sentIn-", "Elixir")
 
   """
   @spec add_dynamic_template_data(t, String.t(), String.t()) :: t
-  def add_dynamic_template_data(%Email{dynamic_template_data: dynamic_template_data} = email, arg_name, arg_value) do
+  def add_dynamic_template_data(
+        %Email{dynamic_template_data: dynamic_template_data} = email,
+        arg_name,
+        arg_value
+      ) do
     dynamic_template_data = Map.put(dynamic_template_data || %{}, arg_name, arg_value)
     %Email{email | dynamic_template_data: dynamic_template_data}
   end
@@ -551,7 +557,8 @@ defmodule SendGrid.Email do
   """
   def put_phoenix_template(email, template_name, assigns \\ [])
   @spec put_phoenix_template(t, atom, []) :: t
-  def put_phoenix_template(%Email{} = email, template_name, assigns) when is_atom(template_name) do
+  def put_phoenix_template(%Email{} = email, template_name, assigns)
+      when is_atom(template_name) do
     with true <- ensure_phoenix_loaded(),
          view_mod <- phoenix_view_module(email),
          layouts <- phoenix_layouts(email),
@@ -635,7 +642,7 @@ defmodule SendGrid.Email do
     unless mod do
       raise ArgumentError,
             "Phoenix view is expected to be set or configured. " <>
-              "Ensure your config for :sendgrid includes a value for :phoenix_view or" <>
+              "Ensure your config for :sendgrid includes a value for :phoenix_view or " <>
               "explicity set the Phoenix view with `put_phoenix_view/2`."
     end
 
@@ -644,7 +651,52 @@ defmodule SendGrid.Email do
 
   defp phoenix_view_module(%Email{__phoenix_view__: view_module}), do: view_module
 
+  @doc """
+  Sets the email to be sent with sandbox mode enabled or disabled.
+
+  The sandbox mode will default to what is explicity configured with
+  SendGrid's configuration.
+  """
+  @spec set_sandbox(t(), boolean()) :: t()
+  def set_sandbox(%Email{} = email, enabled?) when is_boolean(enabled?) do
+    %Email{email | sandbox: enabled?}
+  end
+
   defp config(key) do
     Application.get_env(:sendgrid, key)
+  end
+
+  defimpl Jason.Encoder do
+    def encode(%Email{} = email, opts) do
+      personalizations =
+        email
+        |> Map.take(~w(to cc bcc substitutions custom_args dynamic_template_data)a)
+        |> Enum.filter(fn {_key, v} -> v != nil && v != [] end)
+        |> Enum.into(%{})
+
+      headers =
+        email.headers
+        |> List.wrap()
+        |> Enum.into(%{})
+
+      params = %{
+        personalizations: [personalizations],
+        from: email.from,
+        subject: email.subject,
+        content: email.content,
+        reply_to: email.reply_to,
+        send_at: email.send_at,
+        template_id: email.template_id,
+        attachments: email.attachments,
+        headers: headers,
+        mail_settings: %{
+          sandbox_mode: %{
+            enable: Application.get_env(:sendgrid, :sandbox_enable, email.sandbox)
+          }
+        }
+      }
+
+      Jason.Encode.map(params, opts)
+    end
   end
 end

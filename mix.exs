@@ -14,7 +14,12 @@ defmodule SendGrid.Mixfile do
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
      deps: deps(),
-     xref: [exclude: [Phoenix.View]]
+     xref: [exclude: [Phoenix.View]],
+     preferred_cli_env: [
+       dialyzer: :test,
+       "test.integration": :test
+     ],
+     aliases: aliases()
     ]
   end
 
@@ -36,12 +41,13 @@ defmodule SendGrid.Mixfile do
 
   defp deps do
     [
+      {:dialyxir, "~> 0.5", only: [:dev, :test], runtime: false},
       {:earmark,      "~> 1.2",  only: :dev},
       {:ex_doc,       "~> 0.16.2", only: :dev},
-      {:httpoison,    ">= 0.11.0"},
-      {:poison,       ">= 2.0.0 or >= 3.0.0"},
+      {:jason, "~> 1.1"},
       {:phoenix,      "~> 1.2", only: :test},
-      {:phoenix_html, "~> 2.9", only: :test}
+      {:phoenix_html, "~> 2.9", only: :test},
+      {:tesla, "~> 1.2"}
     ]
   end
 
@@ -66,4 +72,14 @@ defmodule SendGrid.Mixfile do
     ]
   end
 
+  defp aliases do
+    [
+      test: [
+        "test --exclude integration"
+      ],
+      "test.integration": [
+        "test --only integration"
+      ]
+    ]
+  end
 end

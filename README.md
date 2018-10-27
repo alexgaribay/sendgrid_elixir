@@ -11,7 +11,7 @@ SendGrid.Email.build()
 |> SendGrid.Email.put_from("test2@email.com")
 |> SendGrid.Email.put_subject("Hello from Elixir")
 |> SendGrid.Email.put_text("Sent with Elixir")
-|> SendGrid.Mailer.send()
+|> SendGrid.Mail.send()
 ```
 
 ## Installation
@@ -56,9 +56,9 @@ end
 
 ## Phoenix Views
 
-You can use Phoenix Views to set your HTML and text content of your emails. You just have 
-to provide a view module and template name and you're good to go! Additionally, you can set 
-a layout to render the view in with `SendGrid.Email.put_phoenix_layout/2`. See `SendGrid.Email.put_phoenix_template/3` 
+You can use Phoenix Views to set your HTML and text content of your emails. You just have
+to provide a view module and template name and you're good to go! Additionally, you can set
+a layout to render the view in with `SendGrid.Email.put_phoenix_layout/2`. See `SendGrid.Email.put_phoenix_template/3`
 for complete usage.
 
 ### Examples

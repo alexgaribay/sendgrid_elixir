@@ -2,7 +2,7 @@ defmodule SendGrid.Contacts.Lists do
   @moduledoc """
   Module to interact with modifying email lists.
 
-  See [SendGrid's Contact API Docs](https://sendgrid.com/docs/API_Reference/Web_API_v3/Marketing_Campaigns/contactdb.html)
+  See SendGrid's [Contact API Docs](https://sendgrid.com/docs/API_Reference/Web_API_v3/Marketing_Campaigns/contactdb.html)
   for more detail.
   """
 
@@ -10,71 +10,91 @@ defmodule SendGrid.Contacts.Lists do
 
   @doc """
   Retrieves all email lists.
+
+  ## Options
+
+  * `:api_key` - API key to use with the request.
   """
-  @spec all() :: list(%{}) | :error
-  def all() do
-    case SendGrid.get(@base_api_url) do
-      {:ok, %{status_code: 200, body: body}} -> body["lists"]
-      _ -> :error
+  @spec all([SendGrid.api_key()]) :: {:ok[map()]} | {:error, any()}
+  def all(opts \\ []) when is_list(opts) do
+    with {:ok, %{status: 200, body: %{"lists" => lists}}} <- SendGrid.get(@base_api_url, opts) do
+      {:ok, lists}
     end
   end
 
   @doc """
   Creates an email list.
 
-      {:ok, 2} = add("marketing")
+  ## Options
 
+  * `:api_key` - API key to use with the request.
   """
-  @spec add(String.t()) :: {:ok, integer} | :error
-  def add(list_name) do
-    case SendGrid.post(@base_api_url, %{name: list_name}) do
-      {:ok, %{status_code: 201, body: body}} -> {:ok, body["id"]}
-      _ -> :error
+  @spec add(String.t(), [SendGrid.api_key()]) :: {:ok, map()} | {:error, :any}
+  def add(list_name, opts \\ []) when is_list(opts) do
+    with {:ok, %{status: 201, body: body}} <-
+           SendGrid.post(@base_api_url, %{name: list_name}, opts) do
+      {:ok, body}
     end
   end
 
   @doc """
   Retrieves all recipients from an email list.
-  """
-  @spec all_recipients(integer, integer, integer) :: list(%{}) | :error
-  def all_recipients(list_id, page \\ 1, page_size \\ 100) do
-    url = @base_api_url <> "/#{list_id}/recipients?page_size=#{page_size}&page=#{page}"
 
-    case SendGrid.get(url) do
-      {:ok, %{status_code: 200, body: body}} -> body["recipients"]
-      _ -> :error
+  ## Options
+
+  * `:api_key` - API key to use with the request.
+  * `:page` - Page to start at. **Defaults to 1**.
+  * `:page_size` - Page size for pagination. **Defaults to 100**.
+  """
+  @spec all_recipients(integer(), [SendGrid.api_key() | SendGrid.page() | SendGrid.page_size()]) ::
+          {:ok[map()]} | {:error, any()}
+  def all_recipients(list_id, opts \\ []) when is_list(opts) do
+    page = Keyword.get(opts, :page, 1)
+    page_size = Keyword.get(opts, :page_size, 100)
+    query = [page: page, page_size: page_size]
+
+    request_opts =
+      opts
+      |> Keyword.drop([:page, :page_size])
+      |> Keyword.merge(query: query)
+
+    url = "#{@base_api_url}/#{list_id}/recipients"
+
+    with {:ok, %{status: 200, body: %{"recipients" => recipients}}} <-
+           SendGrid.get(url, request_opts) do
+      {:ok, recipients}
     end
   end
 
   @doc """
   Adds a recipient to an email list.
 
-      :ok = add_recipient(123, "recipient_id")
+  ## Options
 
+  * `:api_key` - API key to use with the request.
   """
-  @spec add_recipient(integer, String.t()) :: :ok | :error
-  def add_recipient(list_id, recipient_id) do
-    url = @base_api_url <> "/#{list_id}/recipients/#{recipient_id}"
+  @spec add_recipient(integer(), String.t(), [SendGrid.api_key()]) :: :ok | {:error, any()}
+  def add_recipient(list_id, recipient_id, opts \\ []) when is_list(opts) do
+    url = "#{@base_api_url}/#{list_id}/recipients/#{recipient_id}"
 
-    case SendGrid.post(url, %{}) do
-      {:ok, %{status_code: 201}} -> :ok
-      _ -> :error
+    with {:ok, %{status: 201}} <- SendGrid.post(url, %{}, opts) do
+      :ok
     end
   end
 
   @doc """
   Deletes a recipient from an email list.
 
-      :ok = delete_recipient(123, "recipient_id")
+  ## Options
 
+  * `:api_key` - API key to use with the request.
   """
-  @spec delete_recipient(integer, String.t()) :: :ok | :error
-  def delete_recipient(list_id, recipient_id) do
-    url = @base_api_url <> "/#{list_id}/recipients/#{recipient_id}"
+  @spec delete_recipient(integer, String.t(), [SendGrid.api_key()]) :: :ok | {:error, any()}
+  def delete_recipient(list_id, recipient_id, opts \\ []) when is_list(opts) do
+    url = "#{@base_api_url}/#{list_id}/recipients/#{recipient_id}"
 
-    case SendGrid.delete(url, %{}) do
-      {:ok, %{status_code: 204}} -> :ok
-      _ -> :error
+    with {:ok, %{status: 204}} <- SendGrid.delete(url, opts) do
+      :ok
     end
   end
 end
