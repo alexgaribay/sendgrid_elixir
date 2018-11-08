@@ -550,7 +550,7 @@ defmodule SendGrid.Email do
 
   """
   def put_phoenix_template(email, template_name, assigns \\ [])
-  @spec put_phoenix_template(t, atom, []) :: t
+  @spec put_phoenix_template(t, atom, list()) :: t
   def put_phoenix_template(%Email{} = email, template_name, assigns) when is_atom(template_name) do
     with true <- ensure_phoenix_loaded(),
          view_mod <- phoenix_view_module(email),
@@ -562,7 +562,7 @@ defmodule SendGrid.Email do
     end
   end
 
-  @spec put_phoenix_template(t, String.t(), []) :: t
+  @spec put_phoenix_template(t, String.t(), list()) :: t
   def put_phoenix_template(%Email{} = email, template_name, assigns) do
     with true <- ensure_phoenix_loaded(),
          view_mod <- phoenix_view_module(email),
