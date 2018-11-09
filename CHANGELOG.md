@@ -6,13 +6,14 @@
   * Switch from using `HTTPoison` to using `Tesla`
   * Switch from using `Poison` to `Jason` for JSON serialization
   * `SendGrid.Email` is now responsible for configuring its own JSON serialization
-  * An API key can be set manually for any API as a keyword option, bypassing
+  * An API key can be set manually for any API call as a keyword option, bypassing
     the need for a global API key
   * An API key can be set with the `{:system, "ENV_VAR"}` to use values at runtime
   * Add dialyzer for validing typespecs
   * Add support for dynamic template data
   * Add struct for handling Contact Recipient encoding
   * Working config added for testing
+  * Add support for multiple personalizations in a single sent Email request
 
 ### Bug Fixes
   * Typespecs are now correct

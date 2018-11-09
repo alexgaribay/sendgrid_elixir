@@ -1,6 +1,7 @@
 defmodule SendGrid.Email.Test do
   use ExUnit.Case, async: true
-  alias SendGrid.Email
+
+  alias SendGrid.{Email, Personalization}
 
   @email "test@email.com"
   @name "John Doe"
@@ -138,7 +139,7 @@ defmodule SendGrid.Email.Test do
     header_key = "SOME_KEY"
     header_value = "SOME_VALUE"
     email = Email.add_header(Email.build(), header_key, header_value)
-    assert email.headers == [{header_key, header_value}]
+    assert email.headers == %{header_key => header_value}
   end
 
   test "put_template/2" do
@@ -349,5 +350,34 @@ defmodule SendGrid.Email.Test do
       assert Enum.at(result.content, 0).value =~ "HTML LAYOUT"
       assert Enum.at(result.content, 0).value =~ "awesome"
     end
+  end
+
+  test "set_set_sandbox/2" do
+    email = Email.set_sandbox(Email.build(), true)
+    assert email.sandbox
+    email = Email.set_sandbox(Email.build(), false)
+    refute email.sandbox
+  end
+
+  test "to_personalization/1" do
+    email =
+      Email.build()
+      |> Email.add_to(@email)
+      |> Email.add_cc(@email)
+
+    assert Email.to_personalization(email) == %Personalization{
+             to: [%{email: @email}],
+             cc: [%{email: @email}]
+           }
+  end
+
+  test "add_personalization/2" do
+    personalization_1 = %Personalization{send_at: 1}
+    personalization_2 = %Personalization{send_at: 2}
+
+    email = Email.add_personalization(Email.build(), personalization_1)
+    assert email.personalizations == [personalization_1]
+    email = Email.add_personalization(email, personalization_2)
+    assert email.personalizations == [personalization_1, personalization_2]
   end
 end

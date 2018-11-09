@@ -84,7 +84,7 @@ defmodule SendGrid.Email do
 
   """
 
-  alias SendGrid.Email
+  alias SendGrid.{Email, Personalization}
 
   defstruct to: nil,
             cc: nil,
@@ -96,6 +96,7 @@ defmodule SendGrid.Email do
             template_id: nil,
             substitutions: nil,
             custom_args: nil,
+            personalizations: nil,
             send_at: nil,
             headers: nil,
             attachments: nil,
@@ -115,9 +116,10 @@ defmodule SendGrid.Email do
           template_id: nil | String.t(),
           substitutions: nil | substitutions,
           custom_args: nil | custom_args,
+          personalizations: nil | [Personalization.t()],
           dynamic_template_data: nil | dynamic_template_data,
           send_at: nil | integer,
-          headers: nil | [header],
+          headers: nil | headers(),
           attachments: nil | [attachment],
           sandbox: boolean(),
           __phoenix_view__: nil | atom,
@@ -127,7 +129,7 @@ defmodule SendGrid.Email do
 
   @type recipient :: %{required(:email) => String.t(), optional(:name) => String.t()}
   @type content :: %{type: String.t(), value: String.t()}
-  @type header :: {String.t(), String.t()}
+  @type headers :: %{String.t() => String.t()}
   @type attachment :: %{
           required(:content) => String.t(),
           optional(:type) => String.t(),
@@ -343,13 +345,10 @@ defmodule SendGrid.Email do
 
   """
   @spec add_header(t, String.t(), String.t()) :: t
-  def add_header(%Email{headers: nil} = email, header_key, header_value) do
-    %Email{email | headers: [{header_key, header_value}]}
-  end
-
-  def add_header(%Email{headers: [_ | _] = headers} = email, header_key, header_value) do
-    headers = headers ++ [{header_key, header_value}]
-    %Email{email | headers: headers}
+  def add_header(%Email{headers: headers} = email, header_key, header_value)
+      when is_binary(header_key) and is_binary(header_value) do
+    new_headers = Map.put(headers || %{}, header_key, header_value)
+    %Email{email | headers: new_headers}
   end
 
   @doc """
@@ -662,25 +661,42 @@ defmodule SendGrid.Email do
     %Email{email | sandbox: enabled?}
   end
 
+  @doc """
+  Transforms an `t:Email.t/0` to a `t:Personalization.t/0`.
+  """
+  @spec to_personalization(t()) :: Personalization.t()
+  def to_personalization(%Email{} = email) do
+    %Personalization{
+      to: email.to,
+      cc: email.cc,
+      bcc: email.bcc,
+      subject: email.subject,
+      substitutions: email.substitutions,
+      custom_args: email.custom_args,
+      dynamic_template_data: email.dynamic_template_data,
+      send_at: email.send_at,
+      headers: email.headers
+    }
+  end
+
+  @doc """
+  Adds a `t:Personalization.t/0` to an email.
+  """
+  @spec add_personalization(t(), Personalization.t()) :: t()
+  def add_personalization(%Email{} = email, %Personalization{} = personalization) do
+    personalizations = List.wrap(email.personalizations) ++ [personalization]
+
+    %Email{email | personalizations: personalizations}
+  end
+
   defp config(key) do
     Application.get_env(:sendgrid, key)
   end
 
   defimpl Jason.Encoder do
-    def encode(%Email{} = email, opts) do
-      personalization =
-        email
-        |> Map.take(~w(to cc bcc substitutions custom_args dynamic_template_data)a)
-        |> Enum.filter(fn {_key, v} -> v != nil && v != [] end)
-        |> Enum.into(%{})
-
-      headers =
-        email.headers
-        |> List.wrap()
-        |> Enum.into(%{})
-
+    def encode(%Email{personalizations: [_ | _]} = email, opts) do
       params = %{
-        personalizations: [personalization],
+        personalizations: email.personalizations,
         from: email.from,
         subject: email.subject,
         content: email.content,
@@ -688,7 +704,7 @@ defmodule SendGrid.Email do
         send_at: email.send_at,
         template_id: email.template_id,
         attachments: email.attachments,
-        headers: headers,
+        headers: email.headers,
         mail_settings: %{
           sandbox_mode: %{
             enable: Application.get_env(:sendgrid, :sandbox_enable, email.sandbox)
@@ -697,6 +713,14 @@ defmodule SendGrid.Email do
       }
 
       Jason.Encode.map(params, opts)
+    end
+
+    def encode(%Email{personalizations: nil} = email, opts) do
+      personalization = Email.to_personalization(email)
+
+      email
+      |> Email.add_personalization(personalization)
+      |> encode(opts)
     end
   end
 end

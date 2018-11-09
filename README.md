@@ -106,3 +106,69 @@ You can set a default layout to render your view in. Set the `:phoenix_layout` c
 config :sendgrid,
   phoenix_layout: {MyApp.Web.EmailView, :layout}
 ```
+
+## Personalizations
+
+Personalizations are used to identify who should receive the email as well as specifics about how you would like the email to be handled.
+
+Personalizations allow you to define:
+
+- `to`, `cc`, `bcc` - The recipients of your email.
+- `subject` - The subject of your email.
+- `headers` - Any headers you would like to include in your email.
+- `substitutions` - Any substitutions you would like to be made for your email.
+- `custom_args` - Any custom arguments you would like to include in your email.
+- `dynamic_template_data` - Data to send along with a template.
+- `send_at` - A specific time that you would like your email to be sent.
+
+An `t:SendGrid.Email` automatically takes these fields and transforms them into a personalization to be sent in the email. However, you can add multiple personalizations to an email and specify different handling instructions for different copies of your email. For example, you could send the same email to both <john@example.com> and <janeexampexample@example.com>, but set each email to be delivered at different times.
+
+### Example
+
+```elixir
+alias SendGrid.{Mail, Email}
+personalization_1 =
+  Email.build()
+  |> Email.add_to("john@example.com")
+  |> Email.put_subject("Exciting news!")
+  |> Email.to_personalization()
+
+personalization_2 =
+  Email.build()
+  |> Email.add_to("jane@example.com")
+  |> Email.put_subject("We've some exciting news!")
+  |> Email.to_personalization()
+
+Email.build()
+|> Email.put_from("news@mydomain.com")
+|> Email.put_text("...")
+|> Email.put_html("...")
+|> Email.add_personalization(personalization_1)
+|> Email.add_personalization(personalization_2)
+|> Mail.send()
+```
+
+### Limitations
+
+The SendGrid v3 API limits you to 1,000 personalizations per API request. If you need to include more than 1,000 personalizations, please divide these across multiple API requests.
+
+## Testing
+
+To run the unit tests you will need to create a `config/config.exs` file and provide your own SendGrid API and email address to receive a test email.
+
+```elixir
+use Mix.Config
+
+config :sendgrid,
+  api_key: "<API_KEY>",
+  phoenix_view: SendGrid.Email.Test.EmailView,
+  test_address: "recipient@example.com"
+```
+
+The `config` directory is excluded from the git repository so your API key and email address will not be committed.
+
+Once configured you can run the full test suite including integration tests as follows:
+
+```console
+mix test --include integration
+```
