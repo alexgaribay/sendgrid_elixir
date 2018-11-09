@@ -668,7 +668,7 @@ defmodule SendGrid.Email do
 
   defimpl Jason.Encoder do
     def encode(%Email{} = email, opts) do
-      personalizations =
+      personalization =
         email
         |> Map.take(~w(to cc bcc substitutions custom_args dynamic_template_data)a)
         |> Enum.filter(fn {_key, v} -> v != nil && v != [] end)
@@ -680,7 +680,7 @@ defmodule SendGrid.Email do
         |> Enum.into(%{})
 
       params = %{
-        personalizations: [personalizations],
+        personalizations: [personalization],
         from: email.from,
         subject: email.subject,
         content: email.content,
