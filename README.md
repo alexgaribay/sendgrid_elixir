@@ -121,7 +121,7 @@ Personalizations allow you to define:
 - `dynamic_template_data` - Data to send along with a template.
 - `send_at` - A specific time that you would like your email to be sent.
 
-An `t:SendGrid.Email` automatically takes these fields and transforms them into a personalization to be sent in the email. However, you can add multiple personalizations to an email and specify different handling instructions for different copies of your email. For example, you could send the same email to both <john@example.com> and <janeexampexample@example.com>, but set each email to be delivered at different times.
+An `SendGrid.Email` automatically takes these fields and transforms them into a personalization to be sent in the email. However, you can add multiple personalizations to an email and specify different handling instructions for different copies of your email. For example, you could send the same email to both <john@example.com> and <janeexampexample@example.com>, but set each email to be delivered at different times.
 
 ### Example
 
