@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.0.0 (Unreleased)
+## 2.0.0 (2019-3-15)
 
 ### Enhancements
   * Switch from using `HTTPoison` to using `Tesla`
