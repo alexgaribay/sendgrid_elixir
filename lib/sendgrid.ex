@@ -135,6 +135,8 @@ defmodule SendGrid do
     end
   end
 
+  defp adapter, do: Application.get_env(:sendgrid, :adapter)
+
   defp build_client(api_key) do
     middleware = [
       {Tesla.Middleware.BaseUrl, "https://api.sendgrid.com"},
@@ -142,7 +144,7 @@ defmodule SendGrid do
       {Tesla.Middleware.Headers, [{"Authorization", "Bearer #{api_key}"}]}
     ]
 
-    Tesla.client(middleware)
+    Tesla.client(middleware, adapter())
   end
 
   defp query_opts(opts) do
