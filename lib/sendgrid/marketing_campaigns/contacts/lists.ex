@@ -15,7 +15,7 @@ defmodule SendGrid.Contacts.Lists do
 
   * `:api_key` - API key to use with the request.
   """
-  @spec all([SendGrid.api_key()]) :: {:ok[map()]} | {:error, any()}
+  @spec all([SendGrid.api_key()]) :: {:ok, [map()]} | {:error, any()}
   def all(opts \\ []) when is_list(opts) do
     with {:ok, %{status: 200, body: %{"lists" => lists}}} <- SendGrid.get(@base_api_url, opts) do
       {:ok, lists}
