@@ -83,13 +83,13 @@ defmodule SendGrid.Contacts.Lists do
   end
 
   @doc """
-  Adds a recipient to an email list.
+  Adds multiple recipients to an email list.
 
-      :ok = add_recipient(123, "recipient_id")
+      :ok = add_recipients(123, ["recipient_id_1", "recipient_id_2"])
 
   """
-  @spec add_multiple_recipients(integer(), [String.t()], [SendGrid.api_key()]) :: :ok | {:error, any()}
-  def add_multiple_recipients(list_id, recipient_ids, opts \\ []) when is_list(recipient_ids) do
+  @spec add_recipients(integer(), [String.t()], [SendGrid.api_key()]) :: :ok | {:error, any()}
+  def add_recipients(list_id, recipient_ids, opts \\ []) when is_list(recipient_ids) do
     url = "#{@base_api_url}/#{list_id}/recipients"
 
     with {:ok, %{status: 201}} <- SendGrid.post(url, recipient_ids, opts) do
