@@ -64,7 +64,7 @@ defmodule SendGrid do
   """
   @spec post(path :: String.t(), body :: Tesla.Env.body(), options :: options()) ::
           {:ok, Response.t()} | {:error, any()}
-  def post(path, body, opts \\ []) when is_map(body) and is_list(opts) do
+  def post(path, body, opts \\ []) when is_list(opts) do
     opts
     |> api_key()
     |> build_client()
@@ -82,7 +82,7 @@ defmodule SendGrid do
   """
   @spec patch(path :: String.t(), body :: Tesla.Env.body(), options :: options()) ::
           {:ok, Response.t()} | {:error, any()}
-  def patch(path, body, opts \\ []) when is_map(body) and is_list(opts) do
+  def patch(path, body, opts \\ []) when is_list(opts) do
     opts
     |> api_key()
     |> build_client()
