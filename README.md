@@ -54,6 +54,13 @@ defp application do
 end
 ```
 
+Configure adapter options.
+
+```elixir
+config :sendgrid,
+  adapter: {Tesla.Adapter.Httpc, [timeout: 30000, proxy: "http://proxy:9999"]}
+```
+
 ## Phoenix Views
 
 You can use Phoenix Views to set your HTML and text content of your emails. You just have
