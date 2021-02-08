@@ -36,6 +36,29 @@ defmodule SendGrid.Contacts.Recipients do
     end
   end
 
+  @doc """
+  Adds or updates multiple recipients in contacts list.
+  Recipients param must be in format required by Sendgrid:
+    [
+      %{
+        "email" => "test@example.com",
+        "name"  => "John Doe",
+        etc...
+      }
+    ]
+  """
+  @spec add_multiple([]) :: {:ok, [String.t]} | {:ok, map()} | {:error, list(String.t)}
+  def add_multiple(recipients) when is_list(recipients) do
+    with {:ok, response} <- SendGrid.patch(@base_api_url, recipients) do
+      handle_recipient_result(response)
+    end
+  end
+
+  # Handles the result when there are multiple persisted recipients.
+  defp handle_recipient_result(%{body: %{"persisted_recipients" => recipients} = body}) when is_list(recipients) and length(recipients) > 1 do
+    {:ok, body}
+  end
+
   # Handles the result when errors are present.
   defp handle_recipient_result(%{body: %{"error_count" => count} = body}) when count > 0 do
     errors = Enum.map(body["errors"], & &1["message"])

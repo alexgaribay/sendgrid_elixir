@@ -62,9 +62,9 @@ defmodule SendGrid do
   * `:api_key` - API key to use with the request.
   * `:query` - Keyword list of query params to use with the request.
   """
-  @spec post(path :: String.t(), body :: map(), options :: options()) ::
+  @spec post(path :: String.t(), body :: Tesla.Env.body(), options :: options()) ::
           {:ok, Response.t()} | {:error, any()}
-  def post(path, body, opts \\ []) when is_map(body) and is_list(opts) do
+  def post(path, body, opts \\ []) when is_list(opts) do
     opts
     |> api_key()
     |> build_client()
@@ -80,9 +80,9 @@ defmodule SendGrid do
   * `:api_key` - API key to use with the request.
   * `:query` - Keyword list of query params to use with the request.
   """
-  @spec patch(path :: String.t(), body :: map(), options :: options()) ::
+  @spec patch(path :: String.t(), body :: Tesla.Env.body(), options :: options()) ::
           {:ok, Response.t()} | {:error, any()}
-  def patch(path, body, opts \\ []) when is_map(body) and is_list(opts) do
+  def patch(path, body, opts \\ []) when is_list(opts) do
     opts
     |> api_key()
     |> build_client()
