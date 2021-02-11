@@ -1,7 +1,15 @@
 # SendGrid
 
-A wrapper for SendGrid's API to create composable emails.
-Check the [docs](https://hexdocs.pm/sendgrid/) for complete usage.
+[![Module Version](https://img.shields.io/hexpm/v/sendgrid.svg)](https://hex.pm/packages/sendgrid)
+[![Hex Docs](https://img.shields.io/badge/hex-docs-lightgreen.svg)](https://hexdocs.pm/sendgrid/)
+[![Total Download](https://img.shields.io/hexpm/dt/sendgrid.svg)](https://hex.pm/packages/sendgrid)
+[![License](https://img.shields.io/hexpm/l/sendgrid.svg)](https://github.com/alexgaribay/sendgrid_elixir/blob/master/LICENSE)
+[![Last Updated](https://img.shields.io/github/last-commit/alexgaribay/sendgrid_elixir.svg)](https://github.com/alexgaribay/sendgrid_elixir/commits/master)
+
+An Elixir wrapper for SendGrid's API to create composable emails.
+
+Check the [API Reference](https://hexdocs.pm/sendgrid/api-reference.html) for
+complete usage.
 
 ## Example
 
@@ -172,3 +180,9 @@ Once configured you can run the full test suite including integration tests as f
 ```console
 mix test --include integration
 ```
+
+## License
+
+Copyright (c) 2016 Alex Garibay
+
+This library is MIT licensed. See the [LICENSE](https://github.com/alexgaribay/sendgrid_elixir/blob/master/LICENSE) for details.

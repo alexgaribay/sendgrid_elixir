@@ -14,7 +14,7 @@ defmodule SendGrid.Contacts.Recipient do
         }
 
   @doc """
-  Builds a Repient to be used in `SendGrid.Contacts.Recipents`.
+  Builds a Recipient to be used in `SendGrid.Contacts.Recipients`.
   """
   @spec build(String.t(), map()) :: t()
   def build(email, custom_fields \\ %{}) when is_map(custom_fields) do

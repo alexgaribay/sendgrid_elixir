@@ -18,7 +18,7 @@ defmodule SendGrid.Contacts.Recipients do
 
   ## Options
 
-  * `:api_key` - API key to use with the request.
+    * `:api_key` - API key to use with the request.
 
   ## Examples
 
@@ -27,6 +27,7 @@ defmodule SendGrid.Contacts.Recipients do
       {:ok, recipient_id} = add(Recipient.build("test@example.com", %{"name" => "John Doe"}))
 
       {:ok, recipient_id} = add(Recipient.build("test@example.com"))
+
   """
   @spec add(Recipient.t(), [SendGrid.api_key()]) ::
           {:ok, String.t()} | {:error, [String.t(), ...]}

@@ -25,7 +25,7 @@ defmodule SendGrid.Email do
 
   ### Substitutions
 
-  You can provided a key-value pair for subsititions to have text replaced.
+  You can provided a key-value pair for substitutions to have text replaced.
 
       add_substitution(email, "-key-", "value")
 
@@ -457,7 +457,7 @@ defmodule SendGrid.Email do
   Expects a tuple of the view module and layout to use. If you provide an atom as the second element,
   the text and HMTL versions of that template will be used for the respective content types.
 
-  Alernatively, you can set a default layout to use by setting the `:phoenix_view` key in your config as
+  Alternatively, you can set a default layout to use by setting the `:phoenix_view` key in your config as
   an atom which will be used for both text and HTML emails.
 
       config :sendgrid,
@@ -653,7 +653,7 @@ defmodule SendGrid.Email do
   @doc """
   Sets the email to be sent with sandbox mode enabled or disabled.
 
-  The sandbox mode will default to what is explicity configured with
+  The sandbox mode will default to what is explicitly configured with
   SendGrid's configuration.
   """
   @spec set_sandbox(t(), boolean()) :: t()

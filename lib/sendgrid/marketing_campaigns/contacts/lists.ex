@@ -13,7 +13,7 @@ defmodule SendGrid.Contacts.Lists do
 
   ## Options
 
-  * `:api_key` - API key to use with the request.
+    * `:api_key` - API key to use with the request.
   """
   @spec all([SendGrid.api_key()]) :: {:ok, [map()]} | {:error, any()}
   def all(opts \\ []) when is_list(opts) do
