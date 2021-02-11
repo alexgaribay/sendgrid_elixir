@@ -4,7 +4,8 @@ defmodule SendGrid.Mail do
 
   ## Sandbox Mode
 
-  Sandbox mode allows you to test sending emails without actually delivering emails and using your email quota.
+  Sandbox mode allows you to test sending emails without actually delivering
+  emails and using your email quota.
 
   To send emails in sandbox mode, ensure the config key is set:
 
@@ -24,7 +25,7 @@ defmodule SendGrid.Mail do
 
   ## Options
 
-  * `:api_key` - API key to use with the request.
+    * `:api_key` - API key to use with the request.
 
   ## Examples
 

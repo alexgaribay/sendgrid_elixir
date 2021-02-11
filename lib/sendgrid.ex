@@ -42,8 +42,8 @@ defmodule SendGrid do
 
   ## Options
 
-  * `:api_key` - API key to use with the request.
-  * `:query` - Keyword list of query params to use with the request.
+    * `:api_key` - API key to use with the request.
+    * `:query` - Keyword list of query params to use with the request.
   """
   @spec get(path :: String.t(), options :: options()) :: {:ok, Response.t()} | {:error, any()}
   def get(path, opts \\ []) when is_list(opts) do
@@ -59,8 +59,8 @@ defmodule SendGrid do
 
   ## Options
 
-  * `:api_key` - API key to use with the request.
-  * `:query` - Keyword list of query params to use with the request.
+    * `:api_key` - API key to use with the request.
+    * `:query` - Keyword list of query params to use with the request.
   """
   @spec post(path :: String.t(), body :: map(), options :: options()) ::
           {:ok, Response.t()} | {:error, any()}
@@ -77,8 +77,8 @@ defmodule SendGrid do
 
   ## Options
 
-  * `:api_key` - API key to use with the request.
-  * `:query` - Keyword list of query params to use with the request.
+    * `:api_key` - API key to use with the request.
+    * `:query` - Keyword list of query params to use with the request.
   """
   @spec patch(path :: String.t(), body :: map(), options :: options()) ::
           {:ok, Response.t()} | {:error, any()}
@@ -95,8 +95,8 @@ defmodule SendGrid do
 
   ## Options
 
-  * `:api_key` - API key to use with the request.
-  * `:query` - Keyword list of query params to use with the request.
+    * `:api_key` - API key to use with the request.
+    * `:query` - Keyword list of query params to use with the request.
   """
   @spec delete(path :: String.t(), options :: options()) :: {:ok, Response.t()} | {:error, any()}
   def delete(path, opts \\ []) when is_list(opts) do
@@ -113,7 +113,7 @@ defmodule SendGrid do
     unless api_key do
       raise RuntimeError, """
       No API key is configured for SendGrid. Update your config your pass in a
-      key with `:api_key` as an addional request option.
+      key with `:api_key` as an additional request option.
 
           SendGrid.get("/stats", api_key: "API_KEY")
 
