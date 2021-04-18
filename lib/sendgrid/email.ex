@@ -360,7 +360,8 @@ defmodule SendGrid.Email do
 
   """
   @spec put_template(t, String.t() | SendGrid.Template) :: t
-  def put_template(%Email{} = email, template = %SendGrid.Template{}), do: put_template(email, template.id)
+  def put_template(%Email{} = email, template = %SendGrid.LegacyTemplate{}), do: put_template(email, template.id)
+  def put_template(%Email{} = email, template = %SendGrid.DynamicTemplate{}), do: put_template(email, template.id)
   def put_template(%Email{} = email, template_id) do
     %Email{email | template_id: template_id}
   end

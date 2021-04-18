@@ -35,7 +35,7 @@ defmodule SendGrid.Templates do
   #----------------------------------------
   # Pagination
   #----------------------------------------
-  @spec get(SendGrid.Templates.t, SendGrid.query()) :: Templates.t | {:error, [String.t]} | {:error, String.t}
+  @spec next(SendGrid.Templates.t, SendGrid.query()) :: Templates.t | {:error, [String.t]} | {:error, String.t}
   def next(self, options \\ [])
   def next(%SendGrid.Templates{metadata: %SendGrid.MetaData{next: nil}}, options) do
     nil
@@ -67,7 +67,7 @@ defmodule SendGrid.Templates do
   #----------------------------------------
   # CRUD
   #----------------------------------------
-  @spec get(String.t, SendGrid.query()) :: Template.t | {:error, [String.t]} | {:error, String.t}
+  @spec get(String.t, SendGrid.query()) :: SendGrid.DynamicTemplate.t | SendGrid.LegacyTemplate.t | {:error, [String.t]} | {:error, String.t}
   def get(identifier, options \\ []) do
     options = patch_options(options)
     case SendGrid.get(@base_api_url <> "/#{identifier}", options) do
@@ -78,8 +78,19 @@ defmodule SendGrid.Templates do
     end
   end
 
-  @spec update(Template.t, SendGrid.query()) :: Template.t | {:error, [String.t]} | {:error, String.t}
-  def update(%Template{} = template, options \\ []) do
+  @spec update(SendGrid.LegacyTemplate.t | SendGrid.DynamicTemplate.t, SendGrid.query()) :: SendGrid.DynamicTemplate.t | SendGrid.LegacyTemplate.t | {:error, [String.t]} | {:error, String.t}
+  def update(template, options \\ [])
+  def update(%SendGrid.LegacyTemplate{} = template, options) do
+    options = patch_options(options)
+    case SendGrid.patch(@base_api_url <> "/#{template.id}", template, options) do
+      { :ok, response = %SendGrid.Response{ status: status_code } } when status_code in @success_codes ->
+        SendGrid.Template.new(response.body, :json)
+      { :ok, %SendGrid.Response{ body: body } } ->
+        { :error, body["errors"] || body["error"] }
+      _ -> { :error, "Unable to communicate with SendGrid API." }
+    end
+  end
+  def update(%SendGrid.DynamicTemplate{} = template, options) do
     options = patch_options(options)
     case SendGrid.patch(@base_api_url <> "/#{template.id}", template, options) do
       { :ok, response = %SendGrid.Response{ status: status_code } } when status_code in @success_codes ->
@@ -90,8 +101,19 @@ defmodule SendGrid.Templates do
     end
   end
 
-  @spec create(Template.t, SendGrid.query()) :: Template.t | {:error, [String.t]} | {:error, String.t}
-  def create(%Template{} = template, options \\ []) do
+  @spec create(SendGrid.LegacyTemplate.t | SendGrid.DynamicTemplate.t, SendGrid.query()) :: SendGrid.DynamicTemplate.t | SendGrid.LegacyTemplate.t | {:error, [String.t]} | {:error, String.t}
+  def create(template, options \\ [])
+  def create(%SendGrid.LegacyTemplate{} = template, options) do
+    options = patch_options(options)
+    case SendGrid.post(@base_api_url, template, options) do
+      { :ok, response = %SendGrid.Response{ status: status_code } } when status_code in @success_codes ->
+        SendGrid.Template.new(response.body, :json)
+      { :ok, %SendGrid.Response{ body: body }} ->
+        { :error, body["errors"] || body["error"] }
+      _ -> { :error, "Unable to communicate with SendGrid API." }
+    end
+  end
+  def create(%SendGrid.DynamicTemplate{} = template, options) do
     options = patch_options(options)
     case SendGrid.post(@base_api_url, template, options) do
       { :ok, response = %SendGrid.Response{ status: status_code } } when status_code in @success_codes ->
@@ -102,10 +124,13 @@ defmodule SendGrid.Templates do
     end
   end
 
-  @spec delete(String.t | Template.t, SendGrid.query()) :: :ok | {:error, [String.t]} | {:error, String.t}
+  @spec delete(String.t | SendGrid.DynamicTemplate.t | Sendgrid.LegacyTemplate.t, SendGrid.query()) :: :ok | {:error, [String.t]} | {:error, String.t}
   def delete(template, options \\ [])
-  def delete(%Template{} = template, options) do
-    delete(template.id, options)
+  def delete(%SendGrid.LegacyTemplate{id: id}, options) do
+    delete(id, options)
+  end
+  def delete(%SendGrid.DynamicTemplate{id: id}, options) do
+    delete(id, options)
   end
   def delete(identifier, options) when is_bitstring(identifier) do
     options = patch_options(options)
@@ -119,7 +144,7 @@ defmodule SendGrid.Templates do
     end
   end
 
-  @spec list(SendGrid.query()) :: [SendGrid.Template.t] | {:error, [String.t]} | {:error, String.t}
+  @spec list(SendGrid.query()) :: SendGrid.Templates.t | {:error, [String.t]} | {:error, String.t}
   def list(options \\ []) do
     options = patch_options(options)
     fetch = SendGrid.get(@base_api_url, options)

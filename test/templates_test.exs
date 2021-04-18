@@ -11,6 +11,8 @@ defmodule SendGrid.Templates.Test do
   alias SendGrid.Template
   alias SendGrid.Template.Versions
   alias SendGrid.Template.Version
+  alias SendGrid.DynamicTemplate
+  alias SendGrid.LegacyTemplate
 
   @tag :templates
   test "generations query param patch" do
@@ -22,8 +24,8 @@ defmodule SendGrid.Templates.Test do
   @tag :templates
   test "fetch templates" do
     test_run = :os.system_time(:millisecond)
-    fixture_a = Templates.create(%Template{name: "TestTemplate#{test_run}a"})
-    fixture_b = Templates.create(%Template{name: "TestTemplate#{test_run}b"})
+    fixture_a = Templates.create(%LegacyTemplate{name: "TestTemplate#{test_run}a"})
+    fixture_b = Templates.create(%DynamicTemplate{name: "TestTemplate#{test_run}b"})
     try do
       actual = Templates.list(query: [page_size: 1])
       assert %Templates{} = actual
@@ -39,8 +41,8 @@ defmodule SendGrid.Templates.Test do
   @tag :templates
   test "paginated fetch templates" do
     test_run = :os.system_time(:millisecond)
-    fixture_a = Templates.create(%Template{name: "TestTemplate#{test_run}a"})
-    fixture_b = Templates.create(%Template{name: "TestTemplate#{test_run}b"})
+    fixture_a = Templates.create(%LegacyTemplate{name: "TestTemplate#{test_run}a"})
+    fixture_b = Templates.create(%DynamicTemplate{name: "TestTemplate#{test_run}b"})
     try do
       actual = Templates.list(query: [page_size: 1])
       assert %Templates{} = actual
@@ -70,12 +72,12 @@ defmodule SendGrid.Templates.Test do
     updated_name = "UpdatedTemplateName#{test_run}"
 
     # Create Template
-    new_template = Templates.create(%Template{name: name})
+    new_template = Templates.create(%DynamicTemplate{name: name})
     assert new_template.id != nil
 
     try do
       # Update Template
-      _updated_template = Templates.update(%Template{new_template| name: updated_name})
+      _updated_template = Templates.update(%DynamicTemplate{new_template| name: updated_name})
 
       # Read Template
       read_template = Templates.get(new_template.id)
@@ -98,7 +100,7 @@ defmodule SendGrid.Templates.Test do
     updated_test_version = "TestVersionUpdated#{test_run}"
 
     # Create Template
-    new_template = Templates.create(%Template{name: name, generation: :legacy})
+    new_template = Templates.create(%LegacyTemplate{name: name})
     template_id = new_template.id
     assert template_id != nil
 
@@ -136,7 +138,7 @@ defmodule SendGrid.Templates.Test do
     updated_test_version = "TestVersionUpdated#{test_run}"
 
     # Create Template
-    new_template = Templates.create(%Template{name: name, generation: :dynamic})
+    new_template = Templates.create(%DynamicTemplate{name: name})
     template_id = new_template.id
     assert template_id != nil
 
