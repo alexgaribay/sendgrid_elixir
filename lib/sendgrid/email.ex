@@ -33,7 +33,7 @@ defmodule SendGrid.Email do
 
   You can provide a Unix timestamp to have an email delivered in the future.
 
-      send_at(email, 1409348513)
+      put_send_at(email, 1409348513)
 
   ## Phoenix Views
 
@@ -359,7 +359,8 @@ defmodule SendGrid.Email do
       Email.put_template(%Email{}, "the_template_id")
 
   """
-  @spec put_template(t, String.t()) :: t
+  @spec put_template(t, String.t() | SendGrid.Template) :: t
+  def put_template(%Email{} = email, template = %SendGrid.Template{}), do: put_template(email, template.id)
   def put_template(%Email{} = email, template_id) do
     %Email{email | template_id: template_id}
   end
