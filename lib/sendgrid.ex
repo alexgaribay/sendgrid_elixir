@@ -73,6 +73,24 @@ defmodule SendGrid do
   end
 
   @doc """
+  Performs a PUT request.
+
+  ## Options
+
+  * `:api_key` - API key to use with the request.
+  * `:query` - Keyword list of query params to use with the request.
+  """
+  @spec post(path :: String.t(), body :: map(), options :: options()) ::
+          {:ok, Response.t()} | {:error, any()}
+  def put(path, body, opts \\ []) when is_map(body) and is_list(opts) do
+    opts
+    |> api_key()
+    |> build_client()
+    |> Tesla.put(path, body, query_opts(opts))
+    |> parse_response()
+  end
+
+  @doc """
   Performs a PATCH request.
 
   ## Options
