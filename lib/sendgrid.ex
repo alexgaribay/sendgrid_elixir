@@ -80,7 +80,7 @@ defmodule SendGrid do
   * `:api_key` - API key to use with the request.
   * `:query` - Keyword list of query params to use with the request.
   """
-  @spec post(path :: String.t(), body :: map(), options :: options()) ::
+  @spec put(path :: String.t(), body :: map(), options :: options()) ::
           {:ok, Response.t()} | {:error, any()}
   def put(path, body, opts \\ []) when is_map(body) and is_list(opts) do
     opts

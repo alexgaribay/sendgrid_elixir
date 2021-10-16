@@ -1,6 +1,6 @@
 defmodule SendGrid.Marketing.Contacts do
   @moduledoc """
-  Module to interact with modifying contacts.
+  Module to interact with contacts.
 
   See SendGrid's [Contact API Docs](https://sendgrid.api-docs.io/v3.0/contacts)
   for more detail.
@@ -11,7 +11,7 @@ defmodule SendGrid.Marketing.Contacts do
   @doc """
   Adds one or multiple contacts to one or multiple lists available in Marketing Campaigns.
 
-  When adding a contact, an email address must provided at a minimum.
+  When adding a contact, an email address must be provided at a minimum.
   The process is asynchrnous and SendGrid will return a Job ID to check the status.
 
   ## Options
@@ -34,6 +34,7 @@ defmodule SendGrid.Marketing.Contacts do
 
   @doc """
   Deletes a contact.
+  The process is asynchrnous and SendGrid will return a Job ID to check the status.
 
   ## Options
 
@@ -51,6 +52,7 @@ defmodule SendGrid.Marketing.Contacts do
 
   @doc """
   Deletes all contacts.
+  The process is asynchrnous and SendGrid will return a Job ID to check the status.
 
   ## Options
 
