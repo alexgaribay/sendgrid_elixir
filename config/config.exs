@@ -5,3 +5,5 @@ config :sendgrid,
   sandbox_enable: true,
   phoenix_view: SendGrid.EmailView,
   test_address: System.get_env("SENDGRID_TEST_EMAIL")
+
+  config :phoenix, :json_library, Jason

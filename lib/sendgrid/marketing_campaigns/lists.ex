@@ -1,12 +1,12 @@
-defmodule SendGrid.Contacts.Lists do
+defmodule SendGrid.Marketing.Lists do
   @moduledoc """
   Module to interact with modifying email lists.
 
-  See SendGrid's [Contact API Docs](https://sendgrid.com/docs/API_Reference/Web_API_v3/Marketing_Campaigns/contactdb.html)
+  See SendGrid's [Contact API Docs](https://sendgrid.api-docs.io/v3.0/lists)
   for more detail.
   """
 
-  @base_api_url "/v3/contactdb/lists"
+  @base_api_url "/v3/marketing/lists"
 
   @doc """
   Retrieves all email lists.
@@ -17,7 +17,7 @@ defmodule SendGrid.Contacts.Lists do
   """
   @spec all([SendGrid.api_key()]) :: {:ok, [map()]} | {:error, any()}
   def all(opts \\ []) when is_list(opts) do
-    with {:ok, %{status: 200, body: %{"lists" => lists}}} <- SendGrid.get(@base_api_url, opts) do
+    with {:ok, %{status: 200, body: %{"result" => lists}}} <- SendGrid.get(@base_api_url, opts) do
       {:ok, lists}
     end
   end
@@ -67,34 +67,33 @@ defmodule SendGrid.Contacts.Lists do
   end
 
   @doc """
-  Adds a recipient to an email list.
+  Removes a contact from a list.
 
   ## Options
 
   * `:api_key` - API key to use with the request.
   """
-  @spec add_recipient(integer(), String.t(), [SendGrid.api_key()]) :: :ok | {:error, any()}
-  def add_recipient(list_id, recipient_id, opts \\ []) when is_list(opts) do
-    url = "#{@base_api_url}/#{list_id}/recipients/#{recipient_id}"
+  @spec remove_contact(list(String.t()), list(String.t())[SendGrid.api_key()]) ::
+          {:ok, String.t()} | {:error, any()}
+  def remove_contact(list_id, contact_ids, opts \\ []) when is_list(opts) do
+    ids = Enum.join(contact_ids, ",")
+    url = "#{@base_api_url}/#{list_id}/contacts?contact_ids=#{ids}"
 
-    with {:ok, %{status: 201}} <- SendGrid.post(url, %{}, opts) do
-      :ok
+    with {:ok, response} <- SendGrid.delete(url, opts) do
+      handle_result(response)
     end
   end
 
-  @doc """
-  Deletes a recipient from an email list.
-
-  ## Options
-
-  * `:api_key` - API key to use with the request.
-  """
-  @spec delete_recipient(integer, String.t(), [SendGrid.api_key()]) :: :ok | {:error, any()}
-  def delete_recipient(list_id, recipient_id, opts \\ []) when is_list(opts) do
-    url = "#{@base_api_url}/#{list_id}/recipients/#{recipient_id}"
-
-    with {:ok, %{status: 204}} <- SendGrid.delete(url, opts) do
-      :ok
-    end
+  # Handles the result when it's valid.
+  defp handle_result(%{body: %{"job_id" => job_id}}) do
+    {:ok, job_id}
   end
+
+  # Handles the result when errors are present.
+  defp handle_result(%{body: %{"error_count" => count} = body}) when count > 0 do
+    errors = Enum.map(body["errors"], & &1["message"])
+    {:error, errors}
+  end
+
+  defp handle_result(data), do: {:error, data}
 end
