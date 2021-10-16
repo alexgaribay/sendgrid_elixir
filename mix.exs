@@ -37,15 +37,15 @@ defmodule SendGrid.Mixfile do
 
   # Specifies which paths to compile per environment.
   defp elixirc_paths(:test), do: ["lib", "test/support"]
-  defp elixirc_paths(_),     do: ["lib"]
+  defp elixirc_paths(_), do: ["lib"]
 
   defp deps do
     [
-      {:dialyxir, "~> 1.0.0-rc.4", only: [:dev, :test], runtime: false},
-      {:earmark,      "~> 1.2",  only: :dev},
-      {:ex_doc,       "~> 0.19", only: :dev},
-      {:jason, "~> 1.1"},
-      {:phoenix,      "~> 1.2", only: :test},
+      {:dialyxir, "~> 1.1", only: [:dev, :test], runtime: false},
+      {:earmark, "~> 1.2",  only: :dev},
+      {:ex_doc, "~> 0.19", only: :dev},
+      {:jason, "~> 1.2"},
+      {:phoenix, "~> 1.2", only: :test},
       {:phoenix_html, "~> 2.9", only: :test},
       {:tesla, "~> 1.2"}
     ]
