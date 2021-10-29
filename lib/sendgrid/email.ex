@@ -406,10 +406,13 @@ defmodule SendGrid.Email do
 
   ## Examples
 
+      Email.add_dynamic_template_data(%Email{}, "is_default", true)
       Email.add_dynamic_template_data(%Email{}, "-sentIn-", "Elixir")
+      Email.add_dynamic_template_data(%Email{}, "statuses", ["processing", "send", "pending"])
+      Email.add_dynamic_template_data(%Email{}, "mappings", %{"send_grid" => "SendGrid"})
 
   """
-  @spec add_dynamic_template_data(t, String.t(), String.t()) :: t
+  @spec add_dynamic_template_data(t, String.t(), any()) :: t
   def add_dynamic_template_data(
         %Email{dynamic_template_data: dynamic_template_data} = email,
         arg_name,
