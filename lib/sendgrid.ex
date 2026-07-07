@@ -7,11 +7,11 @@ defmodule SendGrid do
   An API key can be set in your application's config.
 
       # Compile-time configured key.
-      config :sendgrid,
+      config :noizu_sendgrid,
         api_key: "sendgrid_api_key"
 
       # Run-time configured key
-      config :sendgrid,
+      config :noizu_sendgrid,
         api_key: {:system, "ENV_KEY"}
 
   Optionally you can supply an API key as a keyword option in the last argument
@@ -117,10 +117,10 @@ defmodule SendGrid do
 
           SendGrid.get("/stats", api_key: "API_KEY")
 
-          config :sendgrid,
+          config :noizu_sendgrid,
             api_key: "sendgrid_api_key"
 
-          config :sendgrid,
+          config :noizu_sendgrid,
             api_key: {:system, "SENDGRID_KEY"}
       """
     end
@@ -129,7 +129,7 @@ defmodule SendGrid do
   end
 
   defp runtime_key do
-    case Application.get_env(:sendgrid, :api_key) do
+    case Application.get_env(:noizu_sendgrid, :api_key) do
       {:system, env_key} -> System.get_env(env_key)
       key -> key
     end

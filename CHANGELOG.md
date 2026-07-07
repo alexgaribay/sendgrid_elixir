@@ -123,11 +123,11 @@
 
 ### Upgrading From Prior Versions
 
-`:sendgrid` needs to be added to the list of applications in the `mix.exs` file.
+`:noizu_sendgrid` needs to be added to the list of applications in the `mix.exs` file.
 
 ```elixir
 def application do
- [applications: [:sendgrid]]
+ [applications: [:noizu_sendgrid]]
 end
 ```
 

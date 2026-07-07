@@ -1,6 +1,6 @@
 use Mix.Config
 
-config :sendgrid,
+config :noizu_sendgrid,
   api_key: {:system, "SENDGRID_API_KEY"},
   sandbox_enable: true,
   phoenix_view: SendGrid.EmailView,

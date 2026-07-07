@@ -33,7 +33,7 @@ defmodule SendGrid.Email do
 
   You can provide a Unix timestamp to have an email delivered in the future.
 
-      send_at(email, 1409348513)
+      put_send_at(email, 1409348513)
 
   ## Phoenix Views
 
@@ -71,7 +71,7 @@ defmodule SendGrid.Email do
   You can set a default Phoenix View to use for rendering templates. Just set the `:phoenix_view`
   config value.
 
-      config :sendgrid,
+      config :noizu_sendgrid,
         phoenix_view: MyApp.Web.EmailView
 
 
@@ -79,7 +79,7 @@ defmodule SendGrid.Email do
 
   You can set a default layout to render the view in. Just set the `:phoenix_layout` config value.
 
-      config :sendgrid,
+      config :noizu_sendgrid,
         phoenix_layout: {MyApp.Web.EmailView, :layout}
 
   """
@@ -91,14 +91,22 @@ defmodule SendGrid.Email do
             bcc: nil,
             from: nil,
             reply_to: nil,
+            reply_to_list: nil,
             subject: nil,
             content: nil,
             template_id: nil,
+            version_id: nil,
             substitutions: nil,
             custom_args: nil,
             personalizations: nil,
             send_at: nil,
             headers: nil,
+            categories: nil,
+            batch_id: nil,
+            asm: nil,
+            ip_pool_name: nil,
+            mail_settings: nil,
+            tracking_settings: nil,
             attachments: nil,
             dynamic_template_data: nil,
             sandbox: false,
@@ -111,15 +119,23 @@ defmodule SendGrid.Email do
           bcc: nil | [recipient],
           from: nil | recipient,
           reply_to: nil | recipient,
+          reply_to_list: nil | [recipient],
           subject: nil | String.t(),
           content: nil | [content],
           template_id: nil | String.t(),
+          version_id: nil | String.t(),
           substitutions: nil | substitutions,
           custom_args: nil | custom_args,
           personalizations: nil | [Personalization.t()],
           dynamic_template_data: nil | dynamic_template_data,
           send_at: nil | integer,
           headers: nil | headers(),
+          categories: nil | [String.t],
+          batch_id: nil | String.t,
+          asm: nil |  asm(),
+          ip_pool_name: nil | String.t,
+          mail_settings: nil | mail_settings(),
+          tracking_settings: nil | tracking_settings(),
           attachments: nil | [attachment],
           sandbox: boolean(),
           __phoenix_view__: nil | atom,
@@ -130,6 +146,18 @@ defmodule SendGrid.Email do
   @type recipient :: %{required(:email) => String.t(), optional(:name) => String.t()}
   @type content :: %{type: String.t(), value: String.t()}
   @type headers :: %{String.t() => String.t()}
+  @type asm :: %{
+                 required(:group_id) => integer,
+                 optional(:groups_to_display) => [integer]
+               }
+  @type mail_settings :: %{
+                           optional(:bypass_list_management) => bypass_filter(),
+                           optional(:bypass_spam_management) => bypass_filter(),
+                           optional(:bypass_bounce_management) => bypass_filter(),
+                           optional(:bypass_unsubscribe_management) => bypass_filter(),
+                           optional(:footer) => footer(),
+                           optional(:sandbox_mode) => enable_status()
+                         }
   @type attachment :: %{
           required(:content) => String.t(),
           optional(:type) => String.t(),
@@ -138,9 +166,48 @@ defmodule SendGrid.Email do
           optional(:content_id) => String.t()
         }
 
+  @type enable_status ::%{
+    required(:enable) => boolean
+  }
+  @type bypass_filter :: enable_status()
+  @type footer :: %{
+                    required(:enable) => boolean,
+                    required(:text) => String.t,
+                    required(:html) => String.t
+                  }
   @type substitutions :: %{String.t() => String.t()}
   @type custom_args :: %{String.t() => String.t()}
   @type dynamic_template_data :: %{String.t() => String.t()}
+
+  @type tracking_settings :: %{
+                            optional(:click_tracking) => click_tracking(),
+                            optional(:open_tracking) => open_tracking(),
+                            optional(:subscription_tracking) => subscription_tracking(),
+                            optional(:ganalytics) => google_analytics_tracking()
+                          }
+
+  @type click_tracking :: %{
+                            optional(:enable) => boolean,
+                            optional(:enable_text) => boolean
+                          }
+  @type open_tracking :: %{
+                            optional(:enable) => boolean,
+                            optional(:substitution_tag) => nil | String.t
+                          }
+  @type subscription_tracking :: %{
+                                   optional(:enable) => boolean,
+                                   optional(:text) => String.t,
+                                   optional(:html) => String.t,
+                                   optional(:substitution_tag) => String.t
+                                 }
+  @type google_analytics_tracking :: %{
+                        optional(:enable) => boolean,
+                        optional(:utm_source) => String.t,
+                        optional(:utm_medium) => String.t,
+                        optional(:utm_content) => String.t,
+                        optional(:utm_campaign) => String.t
+                      }
+
 
   @doc """
   Builds an an empty email to compose on.
@@ -285,6 +352,152 @@ defmodule SendGrid.Email do
     %Email{email | reply_to: address(reply_to_address, reply_to_name)}
   end
 
+
+
+  @doc """
+  Sets the `reply_to_list` field for email. You may not use reply_to_list and reply_to at the same time.
+  """
+  @spec put_reply_to_list(t, [String.t()]) :: t
+  def put_reply_to_list(%Email{} = email, reply_to_addresses) do
+    list = Enum.map(reply_to_addresses, fn(v) ->
+      case v do
+        {address, name} -> address(address, name)
+        address -> address(address)
+      end
+    end)
+    %Email{email | reply_to_list: list}
+  end
+
+  @doc """
+  Set/Replace email categories.
+  """
+  def put_categories(%Email{} = email, categories) do
+    %Email{email| categories: categories}
+  end
+  
+  @doc """
+  Add/set email category.
+  """
+  def put_category(%Email{} = email, category) do
+    case email.categories do
+      nil -> %Email{email| categories: [category]}
+      v -> %Email{email| categories: Enum.uniq(v ++ [category])}
+    end
+  end
+
+  @doc """
+  Set batch_id
+  """
+  def put_batch(%Email{} = email, value) do
+    %Email{email| batch_id: value}
+  end
+
+  @doc """
+  Set asm
+  """
+  def put_asm(%Email{} = email, value) do
+    %Email{email| asm: value}
+  end
+
+
+  @doc """
+  Set ip_pool_name
+  """
+  def put_ip_pool(%Email{} = email, value) do
+    %Email{email| ip_pool_name: value}
+  end
+
+  # Initialize mail_settings
+  defp init_mail_settings(%Email{mail_settings: nil} = email) do
+    %Email{email| mail_settings: %{}}
+  end
+  defp init_mail_settings(%Email{} = email), do: email
+
+  @doc """
+  Set email.mail_settings.bypass_list_management
+  """
+  def configure_list_management_bypass(%Email{} = email, enable) do
+    init_mail_settings(email)
+    |> put_in([Access.key(:mail_settings), :bypass_list_management], %{enable: enable})
+  end
+
+  @doc """
+  Set email.mail_settings.bypass_spam_management
+  """
+  def configure_spam_management_bypass(%Email{} = email, enable) do
+    init_mail_settings(email)
+    |> put_in([Access.key(:mail_settings), :bypass_spam_management], %{enable: enable})
+  end
+
+  @doc """
+  Set email.mail_settings.bypass_bounce_management
+  """
+  def configure_bounce_management_bypass(%Email{} = email, enable) do
+    init_mail_settings(email)
+    |> put_in([Access.key(:mail_settings), :bypass_bounce_management], %{enable: enable})
+  end
+
+  @doc """
+  Set email.mail_settings.bypass_unsubscribe_management
+  """
+  def configure_unsubscribe_management_bypass(%Email{} = email, enable) do
+    init_mail_settings(email)
+    |> put_in([Access.key(:mail_settings), :bypass_unsubscribe_management], %{enable: enable})
+  end
+  
+  @doc """
+  Set email.mail_settings.bypass_unsubscribe_management
+  """
+  def put_footer(%Email{} = email, footer) do
+    init_mail_settings(email)
+    |> put_in([Access.key(:mail_settings), :footer], footer)
+  end
+
+  @doc """
+  Set entire mail_settings field, replacing any previous settings.
+  """
+  def put_mail_settings(%Email{} = email, value) do
+    %Email{mail_settings: value}
+  end
+
+
+  # Initialize track_settings
+  defp init_tracking_settings(%Email{tracking_settings: nil} = email) do
+    %Email{email| tracking_settings: %{}}
+  end
+  defp init_tracking_settings(%Email{} = email), do: email
+
+  def configure_click_tracking(%Email{} = email, value) do
+    email
+    |> init_tracking_settings()
+    |> put_in([Access.key(:tracking_settings), :click_tracking], value)
+  end
+  
+  def configure_open_tracking(%Email{} = email, value) do
+    email
+    |> init_tracking_settings()
+    |> put_in([Access.key(:tracking_settings), :open_tracking], value)
+  end
+  
+  def configure_subscription_tracking(%Email{} = email, value) do
+    email
+    |> init_tracking_settings()
+    |> put_in([Access.key(:tracking_settings), :subscription_tracking], value)
+  end
+
+  def configure_google_analytics(%Email{} = email, value) do
+    email
+    |> init_tracking_settings()
+    |> put_in([Access.key(:tracking_settings), :ganalytics], value)
+  end
+
+  def put_tracking_settings(%Email{} = email, value) do
+    email
+    |> put_in([Access.key(:tracking_settings)], value)
+  end
+
+
+
   @doc """
   Sets the `subject` field for the email.
 
@@ -359,11 +572,28 @@ defmodule SendGrid.Email do
       Email.put_template(%Email{}, "the_template_id")
 
   """
-  @spec put_template(t, String.t()) :: t
+  @spec put_template(t, String.t() | SendGrid.Template) :: t
+  def put_template(%Email{} = email, template = %SendGrid.LegacyTemplate{}), do: put_template(email, template.id)
+  def put_template(%Email{} = email, template = %SendGrid.DynamicTemplate{}), do: put_template(email, template.id)
   def put_template(%Email{} = email, template_id) do
     %Email{email | template_id: template_id}
   end
+  
+  @doc """
+  Uses a predefined SendGrid template version for the email.
 
+  ## Examples
+
+      Email.put_template_version(%Email{}, "the_template_version_id")
+
+  """
+  @spec put_template_version(t, String.t()) :: t
+  def put_template_version(%Email{} = email, version_id) when is_bitstring(version_id) do
+    %Email{email | version_id: version_id}
+  end
+  
+  
+  
   @doc """
   Adds a substitution value to be used with a template.
 
@@ -460,7 +690,7 @@ defmodule SendGrid.Email do
   Alernatively, you can set a default layout to use by setting the `:phoenix_view` key in your config as
   an atom which will be used for both text and HTML emails.
 
-      config :sendgrid,
+      config :noizu_sendgrid,
         phoenix_layout: {MyApp.Web.EmailView, :layout}
 
   ## Examples
@@ -641,7 +871,7 @@ defmodule SendGrid.Email do
     unless mod do
       raise ArgumentError,
             "Phoenix view is expected to be set or configured. " <>
-              "Ensure your config for :sendgrid includes a value for :phoenix_view or " <>
+              "Ensure your config for :noizu_sendgrid includes a value for :phoenix_view or " <>
               "explicity set the Phoenix view with `put_phoenix_view/2`."
     end
 
@@ -653,7 +883,7 @@ defmodule SendGrid.Email do
   @doc """
   Sets the email to be sent with sandbox mode enabled or disabled.
 
-  The sandbox mode will default to what is explicity configured with
+  The sandbox mode will default to what is explicitly configured with
   SendGrid's configuration.
   """
   @spec set_sandbox(t(), boolean()) :: t()
@@ -690,28 +920,76 @@ defmodule SendGrid.Email do
   end
 
   defp config(key) do
-    Application.get_env(:sendgrid, key)
+    Application.get_env(:noizu_sendgrid, key)
   end
 
   defimpl Jason.Encoder do
+    
+    defp conditional_insert(params, email, field, as_field \\ nil) do
+      cond do
+        v = Map.get(email, field) -> put_in(params, [as_field || field], v)
+        :else -> params
+      end
+    end
+    
     def encode(%Email{personalizations: [_ | _]} = email, opts) do
       params = %{
-        personalizations: email.personalizations,
-        from: email.from,
-        subject: email.subject,
-        content: email.content,
-        reply_to: email.reply_to,
-        send_at: email.send_at,
-        template_id: email.template_id,
-        attachments: email.attachments,
-        headers: email.headers,
-        mail_settings: %{
-          sandbox_mode: %{
-            enable: Application.get_env(:sendgrid, :sandbox_enable, email.sandbox)
-          }
-        }
-      }
-
+                 personalizations: email.personalizations,
+                 from: email.from,
+                 subject: email.subject,
+                 content: email.content,
+                 send_at: email.send_at,
+                 attachments: email.attachments,
+                 headers: email.headers,
+               }
+               # Template
+               |> then(
+                    fn(params) ->
+                      cond do
+                        email.template_id && email.version_id -> put_in(params, [:template_id], email.template_id <> "." <> email.version_id)
+                        email.template_id -> put_in(params, [:template_id], email.template_id)
+                        email.version_id -> raise ArgumentError, "You must specify template if specifying template version"
+                        :else -> params
+                      end
+                    end)
+        # Reply List
+               |> then(
+                    fn(params) ->
+                      cond do
+                        email.reply_to_list && email.reply_to ->
+                          raise ArgumentError, "You may not set reply_to_list and reply_to at the same time."
+                        v = email.reply_to -> put_in(params, [:reply_to], v)
+                        v = email.reply_to_list -> put_in(params, [:reply_to_list], v)
+                        :else -> params
+                      end
+                    end)
+        # Mail Settings
+               |> conditional_insert(email, :mail_settings)
+        # Track Settings
+               |> conditional_insert(email, :tracking_settings, :track_settings)
+        # Categories
+               |> conditional_insert(email, :categories)
+        # Batch
+               |> conditional_insert(email, :batch_id)
+        # ASM
+               |> conditional_insert(email, :asm)
+        # IP Pool
+               |> conditional_insert(email, :ip_pool_name)
+        # sandbox_mode
+               |> then(
+                    fn(params) ->
+                      # Insure partially populated.
+                      params
+                      |> update_in([:mail_settings], &(&1 || %{}))
+                      |> update_in([:mail_settings, :sandbox_mode], &(&1 || %{}))
+                      |> update_in([:mail_settings, :sandbox_mode, :enable], fn(p) ->
+                        cond do
+                          is_boolean(p) -> p
+                          :else -> Application.get_env(:noizu_sendgrid, :sandbox_enable, email.sandbox)
+                        end
+                      end)
+                    end)
+      
       Jason.Encode.map(params, opts)
     end
 

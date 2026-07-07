@@ -1,2 +1,2 @@
 <span>HTML LAYOUT</span>
-<%= render @view_module, @view_template, assigns %>
+<%= @inner_content %>

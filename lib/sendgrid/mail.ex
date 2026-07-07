@@ -8,7 +8,7 @@ defmodule SendGrid.Mail do
 
   To send emails in sandbox mode, ensure the config key is set:
 
-      config :sendgrid,
+      config :noizu_sendgrid,
         api_key: "SENDGRID_API_KEY",
         sandbox_enable: true
 

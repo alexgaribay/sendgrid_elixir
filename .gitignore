@@ -1,5 +1,7 @@
 .idea/
 sendgridelixir.iml
+sengrid_elixir.iml
+sendgrid.iml
 /_build
 /cover
 /deps

@@ -19,7 +19,7 @@ SendGrid.Email.build()
 Add the following code to your dependencies in your **`mix.exs`** file:
 
 ```elixir
-{:sendgrid, "~> 2.0"}
+{:noizu_sendgrid, "~> 2.0"}
 ```
 
 ## Configuration
@@ -27,30 +27,30 @@ Add the following code to your dependencies in your **`mix.exs`** file:
 In one of your configuration files, include your SendGrid API key like this:
 
 ```elixir
-config :sendgrid,
+config :noizu_sendgrid,
   api_key: "SENDGRID_API_KEY"
 ```
 
 If you want to use environment variable, use `{:system, "ENV_NAME"}` in your config:
 
 ```elixir
-config :sendgrid,
+config :noizu_sendgrid,
   api_key: {:system, "SENDGRID_API_KEY"}
 ```
 
 If you'd like to enable sandbox mode (emails won't send but will be validated), add the setting to your config:
 
 ```elixir
-config :sendgrid,
+config :noizu_sendgrid,
   api_key: "SENDGRID_API_KEY",
   sandbox_enable: true
 ```
 
-Add `:sendgrid` to your list of applications if using Elixir 1.3 or lower.
+Add `:noizu_sendgrid` to your list of applications if using Elixir 1.3 or lower.
 
 ```elixir
 defp application do
-  [applications: [:sendgrid]]
+  [applications: [:noizu_sendgrid]]
 end
 ```
 
@@ -94,7 +94,7 @@ import SendGrid.Email
 You can set a default Phoenix View to use for rendering templates. Just set the `:phoenix_view` config value
 
 ```elixir
-config :sendgrid,
+config :noizu_sendgrid,
   phoenix_view: MyApp.Web.EmailView
 ```
 
@@ -103,7 +103,7 @@ config :sendgrid,
 You can set a default layout to render your view in. Set the `:phoenix_layout` config value.
 
 ```elixir
-config :sendgrid,
+config :noizu_sendgrid,
   phoenix_layout: {MyApp.Web.EmailView, :layout}
 ```
 
@@ -159,7 +159,7 @@ To run the unit tests you will need to create a `config/config.exs` file and pro
 ```elixir
 use Mix.Config
 
-config :sendgrid,
+config :noizu_sendgrid,
   api_key: "<API_KEY>",
   phoenix_view: SendGrid.Email.Test.EmailView,
   test_address: "recipient@example.com"
