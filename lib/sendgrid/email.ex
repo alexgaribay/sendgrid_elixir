@@ -124,7 +124,7 @@ defmodule SendGrid.Email do
           sandbox: boolean(),
           __phoenix_view__: nil | atom,
           __phoenix_layout__:
-            nil | %{optional(:text) => String.t(), optional(:html) => String.t()}
+            nil | %{optional(:text) => {atom, String.t()}, optional(:html) => {atom, String.t()}}
         }
 
   @type recipient :: %{required(:email) => String.t(), optional(:name) => String.t()}
